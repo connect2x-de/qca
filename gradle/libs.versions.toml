@@ -1,0 +1,51 @@
+[versions]
+kotlinJvmTarget = "11"
+kotlin = "1.9.23" # https://github.com/JetBrains/kotlin/releases
+android-gradle-plugin = "8.2.2" # https://developer.android.com/reference/tools/gradle-api
+downloadGradlePlugin = "5.6.0" # https://github.com/michel-kraemer/gradle-download-task/releases
+bouncyCastle = "1.78.1" # https://www.bouncycastle.org/java.html
+trixnity = "4.3.3" # https://gitlab.com/trixnity/trixnity/-/releases
+trixnityOpensslBinaries = "1.0.3" # https://gitlab.com/trixnity/trixnity-openssl-binaries/-/releases
+
+kotlinx-coroutines = "1.8.0" # https://github.com/Kotlin/kotlinx.coroutines/releases
+kotlinx-serialization = "1.6.3" # https://github.com/Kotlin/kotlinx.serialization/releases
+
+okio = "3.9.0" # https://square.github.io/okio/changelog/
+ktor = "2.3.10" # https://github.com/ktorio/ktor/releases
+
+oshaiKotlinLogging = "6.0.4" # https://github.com/oshai/kotlin-logging/releases
+logback = "1.5.5" # https://github.com/qos-ch/logback/tags
+
+kotest = "5.8.0" # https://github.com/kotest/kotest/releases
+
+android-minSdk = "28"
+android-compileSdk = "34"
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+
+bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncyCastle" }
+bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncyCastle" }
+
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+oshai-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "oshaiKotlinLogging" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+
+[bundles]
+bouncycastle = ["bouncycastle-bcprov", "bouncycastle-bcpkix"]
+
+[plugins]
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
+download = { id = "de.undercouch.download", version.ref = "downloadGradlePlugin" }
