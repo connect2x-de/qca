@@ -2,6 +2,7 @@
 kotlinJvmTarget = "11"
 kotlin = "1.9.23" # https://github.com/JetBrains/kotlin/releases
 android-gradle-plugin = "8.2.2" # https://developer.android.com/reference/tools/gradle-api
+dokka = "1.9.20" # https://github.com/Kotlin/dokka/releases"
 downloadGradlePlugin = "5.6.0" # https://github.com/michel-kraemer/gradle-download-task/releases
 bouncyCastle = "1.78.1" # https://www.bouncycastle.org/java.html
 trixnity = "4.3.3" # https://gitlab.com/trixnity/trixnity/-/releases
@@ -48,4 +49,5 @@ bouncycastle = ["bouncycastle-bcprov", "bouncycastle-bcpkix"]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 download = { id = "de.undercouch.download", version.ref = "downloadGradlePlugin" }

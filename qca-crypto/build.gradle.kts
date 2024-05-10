@@ -73,7 +73,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
-        val jvmMain by getting {
+        jvmMain {
             dependencies {
                 implementation(libs.bundles.bouncycastle)
             }

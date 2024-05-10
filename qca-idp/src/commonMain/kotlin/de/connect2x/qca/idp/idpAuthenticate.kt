@@ -15,22 +15,22 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.core.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import okio.ByteString.Companion.decodeBase64
-import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 
 /**
  * Authentication flow against an IDP using the [challengeUrl] of a Relying Party and returning the redirect from the IDP.
  */
 suspend fun idpAuthenticate(
-    challengeUrl: Url,
-    idpUrl: Url,
-    cardCertificatePublicKey: ByteArray,
+    challengeUrl: String,
+    idpUrl: String,
+    signingPublicKey: ByteArray,
     signChallenge: SignChallenge,
     engine: HttpClientEngine? = null,
 ): String = coroutineScope {
@@ -73,13 +73,13 @@ suspend fun idpAuthenticate(
         header = JWS.Header(
             contentType = "NJWT",
             algorithm = "BP256R1",
-            x509CertificateChain = listOf(cardCertificatePublicKey.toByteString().base64())
+            x509CertificateChain = listOf(signingPublicKey.toByteString().base64())
         ),
         payload = Payload(
             "njwt" to JsonPrimitive(challenge.token.encodeToString())
         )
     ) {
-        signChallenge(it.encodeUtf8().sha256().toByteArray(), challenge.userConsent)
+        signChallenge(it.toByteArray(), challenge.userConsent)
     }.encodeToString()
 
     val ephemeralKey = BrainpoolP256r1Key()

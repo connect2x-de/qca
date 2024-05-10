@@ -14,4 +14,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "qca"
-include(":qca-crypto", ":qca-idp")
+include(":qca-crypto", ":qca-idp", ":qca-raw")
