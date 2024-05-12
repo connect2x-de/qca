@@ -10,7 +10,7 @@ actual fun ByteArray.encryptAes256Gcm(
     initialisationVector: ByteArray,
     authenticationData: ByteArray?,
 ): EncryptAesGcmResult {
-    require(initialisationVector.size == 16) { "initialization vector must have size 12" }
+    require(initialisationVector.size == 16) { "initialization vector must have size 16" }
     val cipher = Cipher.getInstance("AES/GCM/NoPadding")
     val keySpec: Key = SecretKeySpec(key, "AES")
     val gcmSpec = GCMParameterSpec(128, initialisationVector)

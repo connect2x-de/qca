@@ -8,7 +8,7 @@ actual fun ByteArray.encryptAes256Gcm(
     initialisationVector: ByteArray,
     authenticationData: ByteArray?,
 ): EncryptAesGcmResult = withFree {
-    require(initialisationVector.size == 16) { "initialization vector must have size 12" }
+    require(initialisationVector.size == 16) { "initialization vector must have size 16" }
     val cipher = EVP_aes_256_gcm().checkNotNullError().freeAfter(::EVP_CIPHER_free)
     val context = EVP_CIPHER_CTX_new().checkNotNullError().freeAfter(::EVP_CIPHER_CTX_free)
     val cipherText = encryptAes(cipher, context, this@encryptAes256Gcm, key, initialisationVector, authenticationData)
