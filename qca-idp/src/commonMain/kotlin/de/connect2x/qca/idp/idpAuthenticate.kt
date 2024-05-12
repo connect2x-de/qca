@@ -66,9 +66,10 @@ suspend fun idpAuthenticate(
     val peerPublicKey = async {
         val jwk = httpClient.get(oidcWellKnown.pukIdpEncUri).body<JWK>()
         log.debug { "got enc key from IDP" }
-        val x = checkNotNull(
-            (jwk["x"] as? JsonPrimitive)?.contentOrNull?.decodeBase64()?.toByteArray()
-        ) { "x missing in puk_idp_enc" }
+        val x =
+            checkNotNull(
+                (jwk["x"] as? JsonPrimitive)?.contentOrNull?.decodeBase64()?.toByteArray()
+            ) { "x missing in puk_idp_enc" }
         val y =
             checkNotNull(
                 (jwk["y"] as? JsonPrimitive)?.contentOrNull?.decodeBase64()?.toByteArray()
@@ -103,12 +104,10 @@ suspend fun idpAuthenticate(
             "exp" to JsonPrimitive(challenge.token.payload.expirationTime),
             "epk" to joseJson.encodeToJsonElement(
                 JWK(
-                    mapOf(
-                        "kty" to JsonPrimitive("EC"),
-                        "crv" to JsonPrimitive("BP-256"),
-                        "x" to JsonPrimitive(ephemeralPublicKey.x.toByteString().base64Url()),
-                        "y" to JsonPrimitive(ephemeralPublicKey.y.toByteString().base64Url())
-                    )
+                    "crv" to JsonPrimitive("BP-256"),
+                    "x" to JsonPrimitive(ephemeralPublicKey.x.toByteString().base64Url()),
+                    "y" to JsonPrimitive(ephemeralPublicKey.y.toByteString().base64Url()),
+                    keyType = "EC"
                 )
             ),
             contentType = "NJWT",

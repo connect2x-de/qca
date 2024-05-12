@@ -10,6 +10,31 @@ import kotlinx.serialization.json.*
 
 @Serializable(with = JWKSerializer::class)
 class JWK(delegate: Map<String, JsonElement>) : Map<String, JsonElement> by delegate {
+    constructor(
+        vararg entries: Pair<String, JsonElement>,
+        keyType: String? = null,
+        keyOps: List<String>? = null,
+        keyId: String? = null,
+        algorithm: String? = null,
+        x509CertificateUrl: String? = null,
+        x509CertificateChain: List<String>? = null,
+        x509CertificateSha1Thumbprint: String? = null,
+        x509CertificateSha256Thumbprint: String? = null,
+    ) : this(
+        buildMap {
+            putAll(entries)
+            if (keyType != null) put("kty", JsonPrimitive(keyType))
+            if (keyOps != null) put("key_ops", JsonArray(keyOps.map { JsonPrimitive(it) }))
+            if (algorithm != null) put("alg", JsonPrimitive(keyId))
+            if (keyId != null) put("kid", JsonPrimitive(keyId))
+            if (x509CertificateUrl != null) put("x5u", JsonPrimitive(x509CertificateUrl))
+            if (x509CertificateChain != null) put("x5c", JsonArray(x509CertificateChain.map { JsonPrimitive(it) }))
+            if (x509CertificateSha1Thumbprint != null) put("x5t", JsonPrimitive(x509CertificateSha1Thumbprint))
+            if (x509CertificateSha256Thumbprint != null)
+                put("x5t#S256", JsonPrimitive(x509CertificateSha256Thumbprint))
+        }
+    )
+
     val keyType: String?
         get() = (get("kty") as? JsonPrimitive)?.contentOrNull
     val keyOps: List<String>?
