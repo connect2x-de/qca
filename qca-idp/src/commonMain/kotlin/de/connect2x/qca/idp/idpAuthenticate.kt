@@ -5,6 +5,7 @@ import de.connect2x.qca.crypto.decodeX962
 import de.connect2x.qca.crypto.encodeX962
 import de.connect2x.qca.crypto.encryptAes256Gcm
 import de.connect2x.qca.idp.jose.*
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.*
@@ -24,8 +25,12 @@ import kotlinx.serialization.json.*
 import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.toByteString
 
+private val log = KotlinLogging.logger {}
+
 /**
  * Authentication flow against an IDP using the [challengeUrl] of a Relying Party and returning the redirect from the IDP.
+ *
+ * @param signingPublicKey must be ASN.1 DER-Encoding
  */
 suspend fun idpAuthenticate(
     challengeUrl: String,
@@ -49,14 +54,18 @@ suspend fun idpAuthenticate(
     val httpClient = if (engine != null) HttpClient(engine, config) else HttpClient(config)
 
     val oidcWellKnown =
-        httpClient.get("/.well-known/openid-configuration") {
+        httpClient.get {
             url.takeFrom(idpUrl)
+            url("/.well-known/openid-configuration")
         }.bodyAsText()
             .let(JWS::decodeFromString) // TODO verify signature?
             .let(OidcWellKnown::fromJWS)
 
+    log.debug { "got config from IDP" }
+
     val peerPublicKey = async {
         val jwk = httpClient.get(oidcWellKnown.pukIdpEncUri).body<JWK>()
+        log.debug { "got enc key from IDP" }
         val x = checkNotNull(
             (jwk["x"] as? JsonPrimitive)?.contentOrNull?.decodeBase64()?.toByteArray()
         ) { "x missing in puk_idp_enc" }
@@ -68,9 +77,11 @@ suspend fun idpAuthenticate(
         encodeX962(x, y)
     }
     val challenge = httpClient.get(challengeUrl).body<Challenge>()
+    log.debug { "got challenge from IDP: $challenge" }
 
     val signedChallengeToken = JWS.sign(
         header = JWS.Header(
+            type = "JWT",
             contentType = "NJWT",
             algorithm = "BP256R1",
             x509CertificateChain = listOf(signingPublicKey.toByteString().base64())
@@ -80,14 +91,16 @@ suspend fun idpAuthenticate(
         )
     ) {
         signChallenge(it.toByteArray(), challenge.userConsent)
-    }.encodeToString()
+    }
+
+    log.debug { "signed challenge: $signedChallengeToken" }
 
     val ephemeralKey = BrainpoolP256r1Key()
     val ephemeralPublicKey = ephemeralKey.publicKey.decodeX962()
 
     val encryptedSignedChallengeToken = JWE.encrypt(
         header = JWE.Header(
-            "exp" to JsonPrimitive(challenge.token.claims.expirationTime),
+            "exp" to JsonPrimitive(challenge.token.payload.expirationTime),
             "epk" to joseJson.encodeToJsonElement(
                 JWK(
                     mapOf(
@@ -103,7 +116,7 @@ suspend fun idpAuthenticate(
             encryptionAlgorithm = "A256GCM",
         ),
         payload = Payload(
-            "njwt" to JsonPrimitive(signedChallengeToken)
+            "njwt" to JsonPrimitive(signedChallengeToken.encodeToString())
         )
     ) { encryptInputData ->
         val encryptAesGcmResult = encryptInputData.plaintext.encryptAes256Gcm(
@@ -117,6 +130,7 @@ suspend fun idpAuthenticate(
             authenticationTag = encryptAesGcmResult.authenticationTag,
         )
     }
+    log.debug { "encrypted challenge: $encryptedSignedChallengeToken" }
     try {
         httpClient.submitForm(
             url = oidcWellKnown.authorizationEndpoint,
@@ -142,13 +156,13 @@ internal data class OidcWellKnown(
     @SerialName("token_endpoint") val tokenEndpoint: String
 ) {
     companion object {
-        fun fromJWS(jws: JWS): OidcWellKnown = Json.decodeFromJsonElement(JsonObject(jws.payload))
+        fun fromJWS(jws: JWS): OidcWellKnown = joseJson.decodeFromJsonElement(JsonObject(jws.payload))
     }
 }
 
 @Serializable
 internal data class Challenge(
-    @SerialName("challenge") val token: JWT,
+    @SerialName("challenge") val token: JWS,
     @SerialName("user_consent") val userConsent: UserConsent,
 )
 

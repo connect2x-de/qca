@@ -43,4 +43,13 @@ class BrainpoolP256r1KeyTest {
         key.sharedSecret(publicKey)
             .toHexString() shouldBe "3647d88e5bc89831b64a28997a0967cd732795c2cdfae9f47d7eb126c31c36a5"
     }
+
+    @Test
+    fun testSameSharedSecret() {
+        repeat(100) {
+            val key1 = BrainpoolP256r1Key()
+            val key2 = BrainpoolP256r1Key()
+            key1.sharedSecret(key2.publicKey) shouldBe key2.sharedSecret(key1.publicKey)
+        }
+    }
 }

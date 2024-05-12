@@ -13,7 +13,7 @@ import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 
 @Serializable(with = JWSSerializer::class)
-data class JWS(
+class JWS(
     val header: Header,
     val payload: Payload,
     val signature: ByteArray,
@@ -96,9 +96,11 @@ data class JWS(
         val x509CertificateSha256Thumbprint: String? by lazy { (get("x5t#S256") as? JsonPrimitive)?.contentOrNull }
         val critical: List<String>? by lazy { (get("crit") as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull } }
     }
+
+    override fun toString(): String = "JWS(${encodeToString()})"
 }
 
-private object JWSSerializer : KSerializer<JWS> {
+internal object JWSSerializer : KSerializer<JWS> {
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("JWSSerializer")
 
     override fun deserialize(decoder: Decoder): JWS = JWS.decodeFromString(decoder.decodeString())
@@ -108,4 +110,4 @@ private object JWSSerializer : KSerializer<JWS> {
     }
 }
 
-private object JWSHeaderSerializer : JsonDelegateSerializer<JWS.Header>("JWSHeaderSerializer", { JWS.Header(it) })
+internal object JWSHeaderSerializer : JsonDelegateSerializer<JWS.Header>("JWSHeaderSerializer", { JWS.Header(it) })

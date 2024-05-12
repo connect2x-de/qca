@@ -14,7 +14,7 @@ import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.encodeUtf8
 
 @Serializable(with = JWTSerializer::class)
-data class JWT(
+class JWT(
     val header: Header,
     val claims: Payload,
 ) {
@@ -56,9 +56,11 @@ data class JWT(
         val contentType: String?
             get() = (get("cty") as? JsonPrimitive)?.contentOrNull
     }
+
+    override fun toString(): String = "JWT(${encodeToString()})"
 }
 
-private object JWTSerializer : KSerializer<JWT> {
+internal object JWTSerializer : KSerializer<JWT> {
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("JWTSerializer")
 
     override fun deserialize(decoder: Decoder): JWT = JWT.decodeFromString(decoder.decodeString())
@@ -68,4 +70,4 @@ private object JWTSerializer : KSerializer<JWT> {
     }
 }
 
-private object JWTHeaderSerializer : JsonDelegateSerializer<JWT.Header>("JWTHeaderSerializer", { JWT.Header(it) })
+internal object JWTHeaderSerializer : JsonDelegateSerializer<JWT.Header>("JWTHeaderSerializer", { JWT.Header(it) })

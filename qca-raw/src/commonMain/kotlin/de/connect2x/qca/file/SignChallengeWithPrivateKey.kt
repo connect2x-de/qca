@@ -1,5 +1,7 @@
 package de.connect2x.qca.file
 
+import de.connect2x.qca.crypto.dropLeadingZeroByte
+import de.connect2x.qca.crypto.padWithLeadingZeroes
 import de.connect2x.qca.idp.SignChallenge
 import de.connect2x.qca.idp.UserConsent
 import org.bouncycastle.asn1.ASN1InputStream
@@ -28,6 +30,7 @@ class SignChallengeWithPrivateKey(private val rawPrivateKey: ByteArray) : SignCh
             asn1Signature.toArray().filterIsInstance<ASN1Integer>()
                 .map { BigIntegers.asUnsignedByteArray(it.value) }
         check(asn1Primitives.size == 2) { "signature did not contain two ASN1Primitive" }
-        return asn1Primitives[0] + asn1Primitives[1]
+        return asn1Primitives[0].dropLeadingZeroByte().padWithLeadingZeroes() +
+                asn1Primitives[1].dropLeadingZeroByte().padWithLeadingZeroes()
     }
 }

@@ -13,7 +13,7 @@ import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 
 @Serializable(with = JWESerializer::class)
-data class JWE(
+class JWE(
     val header: Header,
     val encryptedKey: ByteArray,
     val initializationVector: ByteArray,
@@ -128,9 +128,11 @@ data class JWE(
         val x509CertificateSha256Thumbprint: String? by lazy { (get("x5t#S256") as? JsonPrimitive)?.contentOrNull }
         val critical: List<String>? by lazy { (get("crit") as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull } }
     }
+
+    override fun toString(): String = "JWE(${encodeToString()})"
 }
 
-private object JWESerializer : KSerializer<JWE> {
+internal object JWESerializer : KSerializer<JWE> {
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("JWESerializer")
 
     override fun deserialize(decoder: Decoder): JWE = JWE.decodeFromString(decoder.decodeString())
@@ -140,4 +142,4 @@ private object JWESerializer : KSerializer<JWE> {
     }
 }
 
-private object JWEHeaderSerializer : JsonDelegateSerializer<JWE.Header>("JWEHeaderSerializer", { JWE.Header(it) })
+internal object JWEHeaderSerializer : JsonDelegateSerializer<JWE.Header>("JWEHeaderSerializer", { JWE.Header(it) })

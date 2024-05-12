@@ -26,9 +26,11 @@ class JWK(delegate: Map<String, JsonElement>) : Map<String, JsonElement> by dele
         get() = (get("x5t") as? JsonPrimitive)?.contentOrNull
     val x509CertificateSha256Thumbprint: String?
         get() = (get("x5t#S256") as? JsonPrimitive)?.contentOrNull
+
+    override fun toString(): String = "JWK(${this})"
 }
 
-private object JWKSerializer : KSerializer<JWK> {
+internal object JWKSerializer : KSerializer<JWK> {
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("JWKSerializer")
 
     override fun deserialize(decoder: Decoder): JWK {

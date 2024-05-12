@@ -44,4 +44,4 @@ class Payload(delegate: Map<String, JsonElement>) : Map<String, JsonElement> by 
         get() = (get("jti") as? JsonPrimitive)?.contentOrNull
 }
 
-private object PayloadSerializer : JsonDelegateSerializer<Payload>("PayloadSerializer", { Payload(it) })
+internal object PayloadSerializer : JsonDelegateSerializer<Payload>("PayloadSerializer", { Payload(it) })
