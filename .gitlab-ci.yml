@@ -179,6 +179,7 @@ publish:mac:
   tags: [ "connect2x-mac" ]
   cache:
     - *pull-cache-mac
+  artifacts: *artifact-reports
   rules:
     - *if-main
     - *if-release
@@ -193,6 +194,7 @@ publish:linux:
   image: $BUILD_LINUX_IMAGE_NAME
   cache:
     - *pull-cache-linux
+  artifacts: *artifact-reports
   rules:
     - *if-main
     - *if-release
