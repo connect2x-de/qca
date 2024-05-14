@@ -1,3 +1,6 @@
+rootProject.name = "qca"
+include(":qca-crypto", ":qca-idp", ":qca-raw")
+
 pluginManagement {
     repositories {
         google()
@@ -13,5 +16,9 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "qca"
-include(":qca-crypto", ":qca-idp", ":qca-raw")
+buildCache {
+    local {
+        directory = File(rootDir, ".gradle").resolve("build-cache")
+        removeUnusedEntriesAfterDays = 30
+    }
+}

@@ -184,7 +184,7 @@ publish:mac:
     - *if-release
   script:
     - ./gradlew
-      publish{IosArm64,IosSimulatorArm64,IosX64}PublicationToGitlabRepository
+      publish{IosArm64,IosSimulatorArm64,IosX64}PublicationToGitLabRepository
       --stacktrace
 
 publish:linux:
@@ -198,5 +198,5 @@ publish:linux:
     - *if-release
   script:
     - ./gradlew
-      publish{KotlinMultiplatform,Jvm}PublicationToGitlabRepository
+      publish{KotlinMultiplatform,Jvm}PublicationToGitLabRepository
       --stacktrace
