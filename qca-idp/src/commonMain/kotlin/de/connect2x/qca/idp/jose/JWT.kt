@@ -33,8 +33,8 @@ class JWT(
 
     fun encodeToString(): String =
         listOf(
-            joseJson.encodeToString(header).encodeUtf8().base64Url(),
-            joseJson.encodeToString(claims).encodeUtf8().base64Url(),
+            joseJson.encodeToString(header).encodeUtf8().base64UrlUnpadded(),
+            joseJson.encodeToString(claims).encodeUtf8().base64UrlUnpadded(),
         ).joinToString(".")
 
     @Serializable(with = JWTHeaderSerializer::class)

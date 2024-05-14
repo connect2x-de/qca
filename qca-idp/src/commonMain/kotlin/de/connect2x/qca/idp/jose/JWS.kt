@@ -33,8 +33,8 @@ class JWS(
 
         suspend fun sign(header: Header, payload: Payload, sign: suspend (String) -> ByteArray): JWS {
             val signable = listOf(
-                joseJson.encodeToString(header).encodeUtf8().base64Url(),
-                joseJson.encodeToString(payload).encodeUtf8().base64Url(),
+                joseJson.encodeToString(header).encodeUtf8().base64UrlUnpadded(),
+                joseJson.encodeToString(payload).encodeUtf8().base64UrlUnpadded(),
             ).joinToString(".")
             return JWS(
                 header = header,
@@ -46,9 +46,9 @@ class JWS(
 
     fun encodeToString(): String =
         listOf(
-            joseJson.encodeToString(header).encodeUtf8().base64Url(),
-            joseJson.encodeToString(payload).encodeUtf8().base64Url(),
-            signature.toByteString().base64Url()
+            joseJson.encodeToString(header).encodeUtf8().base64UrlUnpadded(),
+            joseJson.encodeToString(payload).encodeUtf8().base64UrlUnpadded(),
+            signature.toByteString().base64UrlUnpadded()
         ).joinToString(".")
 
     @Serializable(with = JWSHeaderSerializer::class)

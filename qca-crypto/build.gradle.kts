@@ -30,8 +30,6 @@ kotlin {
             useJUnitPlatform()
         }
     }
-    macosArm64()
-    macosX64()
     iosArm64()
     iosSimulatorArm64()
     iosX64()

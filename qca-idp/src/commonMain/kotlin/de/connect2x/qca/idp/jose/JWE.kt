@@ -1,5 +1,10 @@
 package de.connect2x.qca.idp.jose
 
+import de.connect2x.qca.crypto.BrainpoolP256r1Key
+import de.connect2x.qca.crypto.SecureRandom
+import de.connect2x.qca.crypto.decodeX962
+import de.connect2x.qca.crypto.encryptAes256Gcm
+import de.connect2x.qca.idp.jose.JWE.Header
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -47,15 +52,16 @@ class JWE(
             val authenticationTag: ByteArray,
         )
 
-        suspend fun encrypt(
+        fun encrypt(
             header: Header,
             payload: Payload,
-            encrypt: suspend (encryptInputData: EncryptInputData) -> EncryptOutputData
+            encrypt: (encryptInputData: EncryptInputData) -> EncryptOutputData
         ): JWE {
             val encryptInputData =
                 EncryptInputData(
                     plaintext = joseJson.encodeToString(payload).encodeToByteArray(),
-                    authenticationData = joseJson.encodeToString(header).encodeUtf8().base64Url().encodeToByteArray()
+                    authenticationData = joseJson.encodeToString(header).encodeUtf8().base64UrlUnpadded()
+                        .encodeToByteArray()
                 )
             val encryptOutputData = encrypt(encryptInputData)
             return JWE(
@@ -70,11 +76,11 @@ class JWE(
 
     fun encodeToString(): String =
         listOf(
-            joseJson.encodeToString(header).encodeUtf8().base64Url(),
-            encryptedKey.toByteString().base64Url(),
-            initializationVector.toByteString().base64Url(),
-            ciphertext.toByteString().base64Url(),
-            authenticationTag.toByteString().base64Url()
+            joseJson.encodeToString(header).encodeUtf8().base64UrlUnpadded(),
+            encryptedKey.toByteString().base64UrlUnpadded(),
+            initializationVector.toByteString().base64UrlUnpadded(),
+            ciphertext.toByteString().base64UrlUnpadded(),
+            authenticationTag.toByteString().base64UrlUnpadded()
         ).joinToString(".")
 
     @Serializable(with = JWEHeaderSerializer::class)
@@ -143,3 +149,56 @@ internal object JWESerializer : KSerializer<JWE> {
 }
 
 internal object JWEHeaderSerializer : JsonDelegateSerializer<JWE.Header>("JWEHeaderSerializer", { JWE.Header(it) })
+
+internal fun JWE.Companion.encryptForIdp(
+    header: Header,
+    payload: Payload,
+    peerPublicKey: ByteArray,
+    ephemeralKey: BrainpoolP256r1Key = BrainpoolP256r1Key(),
+    initializationVector: ByteArray = SecureRandom.nextBytes(12),
+): JWE {
+    val ephemeralPublicKey = ephemeralKey.publicKey.decodeX962()
+    return encrypt(
+        header = Header(
+            *header.entries.map { it.toPair() }.toTypedArray(),
+            "epk" to joseJson.encodeToJsonElement(
+                JWK(
+                    "crv" to JsonPrimitive("BP-256"),
+                    "x" to JsonPrimitive(ephemeralPublicKey.x.toByteString().base64UrlUnpadded()),
+                    "y" to JsonPrimitive(ephemeralPublicKey.y.toByteString().base64UrlUnpadded()),
+                    keyType = "EC"
+                )
+            ),
+            algorithm = "ECDH-ES",
+            encryptionAlgorithm = "A256GCM",
+        ),
+        payload = payload,
+    ) { encryptInputData ->
+        val encryptAesGcmResult = encryptInputData.plaintext.encryptAes256Gcm(
+            key = deriveJWEKey(peerPublicKey, ephemeralKey),
+            initializationVector = initializationVector,
+            authenticationData = encryptInputData.authenticationData,
+        )
+        JWE.Companion.EncryptOutputData(
+            encryptedKey = ByteArray(0), // not used
+            initializationVector = encryptAesGcmResult.initialisationVector,
+            ciphertext = encryptAesGcmResult.ciphertext,
+            authenticationTag = encryptAesGcmResult.authenticationTag,
+        )
+    }
+}
+
+@OptIn(ExperimentalStdlibApi::class)
+internal fun deriveJWEKey(
+    peerPublicKey: ByteArray,
+    ephemeralKey: BrainpoolP256r1Key = BrainpoolP256r1Key()
+): ByteArray {
+    val sharedSecret = ephemeralKey.sharedSecret(peerPublicKey)
+
+    // Magic KDF
+    // https://tools.ietf.org/html/rfc5084
+    // https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf
+    val part1 = "00000001".hexToByteArray()
+    val part2 = "000000074132353647434d000000000000000000000100".hexToByteArray() // contains "A256GCM"
+    return (part1 + sharedSecret + part2).toByteString().sha256().toByteArray()
+}

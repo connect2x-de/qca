@@ -8,6 +8,6 @@ data class EncryptAesGcmResult(
 
 expect fun ByteArray.encryptAes256Gcm(
     key: ByteArray,
-    initialisationVector: ByteArray = SecureRandom.nextBytes(16),
+    initializationVector: ByteArray = SecureRandom.nextBytes(12),
     authenticationData: ByteArray? = null,
 ): EncryptAesGcmResult

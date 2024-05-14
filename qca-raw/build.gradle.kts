@@ -17,16 +17,16 @@ kotlin {
                 api(libs.ktor.client.core)
             }
         }
+        jvmMain {
+            dependencies {
+                implementation(libs.bundles.bouncycastle)
+            }
+        }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotlinx.coroutines.test)
-            }
-        }
-        jvmMain {
-            dependencies {
-                implementation(libs.bundles.bouncycastle)
             }
         }
     }

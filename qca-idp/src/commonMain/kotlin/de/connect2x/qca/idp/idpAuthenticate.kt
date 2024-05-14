@@ -1,9 +1,6 @@
 package de.connect2x.qca.idp
 
-import de.connect2x.qca.crypto.BrainpoolP256r1Key
-import de.connect2x.qca.crypto.decodeX962
 import de.connect2x.qca.crypto.encodeX962
-import de.connect2x.qca.crypto.encryptAes256Gcm
 import de.connect2x.qca.idp.jose.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
@@ -96,39 +93,18 @@ suspend fun idpAuthenticate(
 
     log.debug { "signed challenge: $signedChallengeToken" }
 
-    val ephemeralKey = BrainpoolP256r1Key()
-    val ephemeralPublicKey = ephemeralKey.publicKey.decodeX962()
 
-    val encryptedSignedChallengeToken = JWE.encrypt(
-        header = JWE.Header(
-            "exp" to JsonPrimitive(challenge.token.payload.expirationTime),
-            "epk" to joseJson.encodeToJsonElement(
-                JWK(
-                    "crv" to JsonPrimitive("BP-256"),
-                    "x" to JsonPrimitive(ephemeralPublicKey.x.toByteString().base64Url()),
-                    "y" to JsonPrimitive(ephemeralPublicKey.y.toByteString().base64Url()),
-                    keyType = "EC"
-                )
+    val encryptedSignedChallengeToken =
+        JWE.encryptForIdp(
+            header = JWE.Header(
+                "exp" to JsonPrimitive(challenge.token.payload.expirationTime),
+                contentType = "NJWT",
             ),
-            contentType = "NJWT",
-            algorithm = "ECDH-ES",
-            encryptionAlgorithm = "A256GCM",
-        ),
-        payload = Payload(
-            "njwt" to JsonPrimitive(signedChallengeToken.encodeToString())
+            payload = Payload(
+                "njwt" to JsonPrimitive(signedChallengeToken.encodeToString())
+            ),
+            peerPublicKey = peerPublicKey.await(),
         )
-    ) { encryptInputData ->
-        val encryptAesGcmResult = encryptInputData.plaintext.encryptAes256Gcm(
-            key = ephemeralKey.sharedSecret(peerPublicKey.await()),
-            authenticationData = encryptInputData.authenticationData,
-        )
-        JWE.Companion.EncryptOutputData(
-            encryptedKey = ByteArray(0), // not used
-            initializationVector = encryptAesGcmResult.initialisationVector,
-            ciphertext = encryptAesGcmResult.ciphertext,
-            authenticationTag = encryptAesGcmResult.authenticationTag,
-        )
-    }
     log.debug { "encrypted challenge: $encryptedSignedChallengeToken" }
     try {
         httpClient.submitForm(

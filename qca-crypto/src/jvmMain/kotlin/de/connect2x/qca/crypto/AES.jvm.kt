@@ -7,13 +7,12 @@ import javax.crypto.spec.SecretKeySpec
 
 actual fun ByteArray.encryptAes256Gcm(
     key: ByteArray,
-    initialisationVector: ByteArray,
+    initializationVector: ByteArray,
     authenticationData: ByteArray?,
 ): EncryptAesGcmResult {
-    require(initialisationVector.size == 16) { "initialization vector must have size 16" }
     val cipher = Cipher.getInstance("AES/GCM/NoPadding")
     val keySpec: Key = SecretKeySpec(key, "AES")
-    val gcmSpec = GCMParameterSpec(128, initialisationVector)
+    val gcmSpec = GCMParameterSpec(128, initializationVector)
 
     cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmSpec)
 
@@ -24,7 +23,7 @@ actual fun ByteArray.encryptAes256Gcm(
     return EncryptAesGcmResult(
         ciphertext = cipherTextAndAuthenticationTag
             .copyOfRange(0, cipherTextAndAuthenticationTag.size - 16),
-        initialisationVector = initialisationVector,
+        initialisationVector = initializationVector,
         authenticationTag = cipherTextAndAuthenticationTag
             .copyOfRange(cipherTextAndAuthenticationTag.size - 16, cipherTextAndAuthenticationTag.size),
     )

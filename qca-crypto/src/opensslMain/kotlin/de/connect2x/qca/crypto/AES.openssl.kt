@@ -5,13 +5,12 @@ import org.openssl.*
 
 actual fun ByteArray.encryptAes256Gcm(
     key: ByteArray,
-    initialisationVector: ByteArray,
+    initializationVector: ByteArray,
     authenticationData: ByteArray?,
 ): EncryptAesGcmResult = withFree {
-    require(initialisationVector.size == 16) { "initialization vector must have size 16" }
     val cipher = EVP_aes_256_gcm().checkNotNullError().freeAfter(::EVP_CIPHER_free)
     val context = EVP_CIPHER_CTX_new().checkNotNullError().freeAfter(::EVP_CIPHER_CTX_free)
-    val cipherText = encryptAes(cipher, context, this@encryptAes256Gcm, key, initialisationVector, authenticationData)
+    val cipherText = encryptAes(cipher, context, this@encryptAes256Gcm, key, initializationVector, authenticationData)
     val authenticationTag = memScoped {
         val output = ByteArray(16)
         output.asUByteArray().usePinned { pinnedOutput ->
@@ -26,7 +25,7 @@ actual fun ByteArray.encryptAes256Gcm(
     }
     EncryptAesGcmResult(
         ciphertext = cipherText,
-        initialisationVector = initialisationVector,
+        initialisationVector = initializationVector,
         authenticationTag = authenticationTag
     )
 }
