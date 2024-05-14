@@ -107,9 +107,9 @@ build:linux:
     - *if-merge-request-or-main
   script:
     - ./gradlew
-      compileKotlin{Jvm}
+      compileKotlinJvm
       compileReleaseKotlinAndroid
-      compileTestKotlin{Jvm}
+      compileTestKotlinJvm
       compileReleaseUnitTestKotlinAndroid
       --stacktrace
 
