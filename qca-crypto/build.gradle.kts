@@ -6,8 +6,8 @@ plugins {
     alias(libs.plugins.download)
 }
 
-class TrixnityOpensslBinariesDirs(project: Project) {
-    val root = project.rootProject.layout.buildDirectory.get().asFile
+class TrixnityOpensslBinariesDirs {
+    val root = layout.buildDirectory.get().asFile
         .resolve("trixnity-openssl-binaries").resolve(libs.versions.trixnityOpensslBinaries.get())
 
     private val rootDir = root.resolve("openssl")
@@ -16,7 +16,7 @@ class TrixnityOpensslBinariesDirs(project: Project) {
     fun lib(target: KonanTarget) = targetDir(target).resolve("lib").resolve("libcrypto.a")
 }
 
-val trixnityOlmBinariesDirs = TrixnityOpensslBinariesDirs(project)
+val trixnityOpensslBinariesDirs = TrixnityOpensslBinariesDirs()
 
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
@@ -41,7 +41,7 @@ kotlin {
                     create("libopenssl") {
                         defFile(project.file("src/opensslMain/cinterop/libopenssl.def"))
                         packageName("org.openssl")
-                        includeDirs.allHeaders(trixnityOlmBinariesDirs.include(target.konanTarget).absolutePath)
+                        includeDirs.allHeaders(trixnityOpensslBinariesDirs.include(target.konanTarget).absolutePath)
                         tasks.named(interopProcessingTaskName) {
                             dependsOn(trixnityBinaries)
                         }
@@ -49,7 +49,7 @@ kotlin {
                 }
 
                 kotlinOptions.freeCompilerArgs =
-                    listOf("-include-binary", trixnityOlmBinariesDirs.lib(target.konanTarget).absolutePath)
+                    listOf("-include-binary", trixnityOpensslBinariesDirs.lib(target.konanTarget).absolutePath)
             }
         }
     }
@@ -100,7 +100,7 @@ val extractOpensslBinaries by tasks.registering(Copy::class) {
             relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
         }
     }
-    into(trixnityOlmBinariesDirs.root)
+    into(trixnityOpensslBinariesDirs.root)
     outputs.cacheIf { true }
     inputs.files(downloadOpensslBinaries)
     dependsOn(downloadOpensslBinaries)
