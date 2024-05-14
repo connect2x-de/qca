@@ -9,7 +9,7 @@ import kotlin.test.Test
 @OptIn(ExperimentalStdlibApi::class)
 class AESTest {
     private val key = ByteArray(32) { (it + 1).toByte() }
-    private val initialisationVector = ByteArray(16) { (it + 1).toByte() }
+    private val initialisationVector = ByteArray(12) { (it + 1).toByte() }
     private val authenticationData = ByteArray(12) { (it + 2).toByte() }
 
     @Test
@@ -17,8 +17,8 @@ class AESTest {
         val encryptAesGcmResult = "hello".encodeToByteArray().encryptAes256Gcm(key, initialisationVector)
 
         assertSoftly {
-            encryptAesGcmResult.ciphertext.toHexString() shouldBe "a623cf5a2f"
-            encryptAesGcmResult.authenticationTag.toHexString() shouldBe "be2445a12b81a033ee3035af65ab7762"
+            encryptAesGcmResult.ciphertext.toHexString() shouldBe "c64bc0f15f"
+            encryptAesGcmResult.authenticationTag.toHexString() shouldBe "dd3d884fa4ba8cff4339f2b5e3cf64c2"
             encryptAesGcmResult.initialisationVector.size shouldNotBe 0
         }
     }
@@ -29,8 +29,8 @@ class AESTest {
             "hello".encodeToByteArray().encryptAes256Gcm(key, initialisationVector, authenticationData)
 
         assertSoftly {
-            encryptAesGcmResult.ciphertext.toHexString() shouldBe "a623cf5a2f"
-            encryptAesGcmResult.authenticationTag.toHexString() shouldBe "987a1d3b6e1d6281e1ab10af68c6253c"
+            encryptAesGcmResult.ciphertext.toHexString() shouldBe "c64bc0f15f"
+            encryptAesGcmResult.authenticationTag.toHexString() shouldBe "fb63d0d5e1264e4d4ca2d7b5eea2369c"
             encryptAesGcmResult.initialisationVector.size shouldNotBe 0
         }
     }
@@ -41,7 +41,7 @@ class AESTest {
 
         assertSoftly {
             encryptAesGcmResult.ciphertext.toHexString() shouldBe ""
-            encryptAesGcmResult.authenticationTag.toHexString() shouldBe "633814d5f4a5ef461103e41fc1efa71f"
+            encryptAesGcmResult.authenticationTag.toHexString() shouldBe "7737397e14746df371992992a1791250"
             encryptAesGcmResult.initialisationVector.size shouldNotBe 0
         }
     }
