@@ -108,9 +108,7 @@ build:linux:
   script:
     - ./gradlew
       compileKotlinJvm
-      compileReleaseKotlinAndroid
       compileTestKotlinJvm
-      compileReleaseUnitTestKotlinAndroid
       --stacktrace
 
 test:mac:
@@ -143,7 +141,7 @@ test:linux:
     - *if-merge-request-or-main
   script:
     - ./gradlew
-      {jvm,testReleaseUnit}Test -x :integrationtests:jvmTest
+      jvmTest
       --stacktrace
 
 security:dependencies:
@@ -200,5 +198,5 @@ publish:linux:
     - *if-release
   script:
     - ./gradlew
-      publish{KotlinMultiplatform,Jvm,AndroidRelease}PublicationToGitlabRepository
+      publish{KotlinMultiplatform,Jvm}PublicationToGitlabRepository
       --stacktrace
