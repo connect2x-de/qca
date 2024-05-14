@@ -1,6 +1,5 @@
 plugins {
     `maven-publish`
-    signing
     alias(libs.plugins.dokka)
     alias(libs.plugins.android.library).apply(false)
     alias(libs.plugins.kotlin.multiplatform).apply(false)
@@ -31,7 +30,6 @@ subprojects {
     if (project.name.startsWith("qca-")) {
         apply(plugin = "org.jetbrains.dokka")
         apply(plugin = "maven-publish")
-        apply(plugin = "signing")
 
         val dokkaJar by tasks.registering(Jar::class) {
             dependsOn(tasks.dokkaHtml)
