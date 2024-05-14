@@ -6,17 +6,15 @@ plugins {
     alias(libs.plugins.download)
 }
 
-class TrixnityOpensslBinariesDirs {
-    val root = layout.buildDirectory.get().asFile
-        .resolve("trixnity-openssl-binaries").resolve(libs.versions.trixnityOpensslBinaries.get())
+val trixnityOpensslBinariesRoot = layout.buildDirectory.get().asFile
+    .resolve("trixnity-openssl-binaries").resolve(libs.versions.trixnityOpensslBinaries.get())
 
-    private val rootDir = root.resolve("openssl")
-    private fun targetDir(target: KonanTarget) = rootDir.resolve(target.name)
-    fun include(target: KonanTarget) = targetDir(target).resolve("include")
-    fun lib(target: KonanTarget) = targetDir(target).resolve("lib").resolve("libcrypto.a")
-}
+private fun trixnityOpensslBinariesTarget(target: KonanTarget) =
+    trixnityOpensslBinariesRoot.resolve("openssl").resolve(target.name)
 
-val trixnityOpensslBinariesDirs = TrixnityOpensslBinariesDirs()
+fun trixnityOpensslBinariesInclude(target: KonanTarget) = trixnityOpensslBinariesTarget(target).resolve("include")
+fun trixnityOpensslBinariesLib(target: KonanTarget) =
+    trixnityOpensslBinariesTarget(target).resolve("lib").resolve("libcrypto.a")
 
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
@@ -41,7 +39,7 @@ kotlin {
                     create("libopenssl") {
                         defFile(project.file("src/opensslMain/cinterop/libopenssl.def"))
                         packageName("org.openssl")
-                        includeDirs.allHeaders(trixnityOpensslBinariesDirs.include(target.konanTarget).absolutePath)
+                        includeDirs.allHeaders(trixnityOpensslBinariesInclude(target.konanTarget).absolutePath)
                         tasks.named(interopProcessingTaskName) {
                             dependsOn(trixnityBinaries)
                         }
@@ -49,7 +47,7 @@ kotlin {
                 }
 
                 kotlinOptions.freeCompilerArgs =
-                    listOf("-include-binary", trixnityOpensslBinariesDirs.lib(target.konanTarget).absolutePath)
+                    listOf("-include-binary", trixnityOpensslBinariesLib(target.konanTarget).absolutePath)
             }
         }
     }
@@ -100,7 +98,7 @@ val extractOpensslBinaries by tasks.registering(Copy::class) {
             relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
         }
     }
-    into(trixnityOpensslBinariesDirs.root)
+    into(trixnityOpensslBinariesRoot)
     outputs.cacheIf { true }
     inputs.files(downloadOpensslBinaries)
     dependsOn(downloadOpensslBinaries)
