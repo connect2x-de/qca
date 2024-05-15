@@ -41,7 +41,7 @@ subprojects {
         publishing {
             repositories {
                 maven {
-                    url = uri("${System.getenv("CI_API_V4_URL")}/projects/26519650/packages/maven")
+                    url = uri("${System.getenv("CI_API_V4_URL")}/projects/57338333/packages/maven")
                     name = "GitLab"
                     credentials(HttpHeaderCredentials::class) {
                         name = "Job-Token"
