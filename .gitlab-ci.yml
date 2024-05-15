@@ -187,6 +187,7 @@ publish:mac:
     - ./gradlew
       publish{IosArm64,IosSimulatorArm64,IosX64}PublicationToGitLabRepository
       --stacktrace
+      --no-configuration-cache
 
 publish:linux:
   stage: publish
@@ -202,3 +203,4 @@ publish:linux:
     - ./gradlew
       publish{KotlinMultiplatform,Jvm}PublicationToGitLabRepository
       --stacktrace
+      --no-configuration-cache
