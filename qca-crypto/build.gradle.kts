@@ -16,7 +16,6 @@ fun trixnityOpensslBinariesInclude(target: KonanTarget) = trixnityOpensslBinarie
 fun trixnityOpensslBinariesLib(target: KonanTarget) =
     trixnityOpensslBinariesTarget(target).resolve("lib").resolve("libcrypto.a")
 
-@OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
     val kotlinJvm = libs.versions.kotlinJvmTarget.get()
     jvmToolchain(kotlinJvm.toInt())
@@ -32,16 +31,18 @@ kotlin {
     iosSimulatorArm64()
     iosX64()
 
+    applyDefaultHierarchyTemplate()
+
     targets.withType<KotlinNativeTarget> {
         compilations {
             "main" {
                 cinterops {
-                    create("libopenssl") {
+                    val libopenssl by creating {
                         defFile("src/opensslMain/cinterop/libopenssl.def")
                         packageName("org.openssl")
                         includeDirs.allHeaders(trixnityOpensslBinariesInclude(target.konanTarget).absolutePath)
                         tasks.named(interopProcessingTaskName) {
-                            dependsOn(trixnityBinaries)
+                            dependsOn("trixnityBinaries")
                         }
                     }
                 }
@@ -51,7 +52,6 @@ kotlin {
             }
         }
     }
-    applyDefaultHierarchyTemplate()
 
     sourceSets {
         all {
