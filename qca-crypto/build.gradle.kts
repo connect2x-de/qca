@@ -37,7 +37,7 @@ kotlin {
             "main" {
                 cinterops {
                     create("libopenssl") {
-                        defFile(project.file("src/opensslMain/cinterop/libopenssl.def"))
+                        defFile("src/opensslMain/cinterop/libopenssl.def")
                         packageName("org.openssl")
                         includeDirs.allHeaders(trixnityOpensslBinariesInclude(target.konanTarget).absolutePath)
                         tasks.named(interopProcessingTaskName) {
