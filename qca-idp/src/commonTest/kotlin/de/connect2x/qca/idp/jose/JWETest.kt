@@ -61,6 +61,7 @@ class JWETest {
             jwe.encryptedKey.size shouldBe 0
             jwe.initializationVector.toHexString() shouldBe initializationVector
             jwe.authenticationTag.toHexString() shouldBe "ab188de186fd159b877c7fa581cd70dd"
+            jwe.ciphertext.toHexString() shouldBe "3f3e1f380ef854868a2a0fb429f0"
         }
     }
 }

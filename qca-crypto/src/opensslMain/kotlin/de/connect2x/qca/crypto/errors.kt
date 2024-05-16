@@ -1,8 +1,9 @@
-@file:OptIn(ExperimentalForeignApi::class)
-
 package de.connect2x.qca.crypto
 
-import kotlinx.cinterop.*
+import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.allocArray
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.toKString
 import org.openssl.ERR_error_string
 import org.openssl.ERR_get_error
 

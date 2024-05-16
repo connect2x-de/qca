@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalForeignApi::class)
-
 package de.connect2x.qca.crypto
 
 import kotlinx.cinterop.CValuesRef
-import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import org.openssl.*

@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalForeignApi::class)
-
 package de.connect2x.qca.crypto
 
 import kotlinx.cinterop.*

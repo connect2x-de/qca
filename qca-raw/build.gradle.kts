@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
 }
 
-@OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
     jvm()
 
