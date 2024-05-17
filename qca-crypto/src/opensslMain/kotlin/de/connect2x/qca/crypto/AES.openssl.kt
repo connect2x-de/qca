@@ -89,7 +89,7 @@ private fun encryptAes(
     val blockSize = EVP_CIPHER_CTX_get_block_size(context).checkError()
     EVP_CIPHER_CTX_set_padding(context, 0)
     if (authenticationData != null && authenticationData.isNotEmpty()) {
-        authenticationData.toUByteArray().usePinned { pinnedAuthenticationData ->
+        authenticationData.asUByteArray().usePinned { pinnedAuthenticationData ->
             memScoped {
                 EVP_EncryptUpdate(
                     ctx = context,

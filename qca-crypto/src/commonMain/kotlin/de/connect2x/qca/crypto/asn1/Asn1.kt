@@ -1,22 +1,22 @@
 package de.connect2x.qca.crypto.asn1
 
 // TODO UByteArray -> ByteArray
-@OptIn(ExperimentalUnsignedTypes::class)
+
 expect object Asn1 {
 
-    fun toObjectIdentifier(oid: String): UByteArray
+    fun toObjectIdentifier(oid: String): ByteArray
 
-    fun toOctetString(data: UByteArray): UByteArray
+    fun toOctetString(data: ByteArray): ByteArray
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
-fun Asn1.derEncodeWithTagAndLengthBytes(tag: Asn1Tag, data: UByteArray): UByteArray {
+fun Asn1.derEncodeWithTagAndLengthBytes(tag: Asn1Tag, data: ByteArray): ByteArray {
     // see https://learn.microsoft.com/en-us/windows/win32/seccertenroll/about-encoded-length-and-value-bytes
-    return tag.rawBytes + derLengthBytes(data.size) + data
+    return (tag.rawBytes + derLengthBytes(data.size) + data)
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
-fun Asn1.derLengthBytes(dataSize: Int): UByteArray {
+fun Asn1.derLengthBytes(dataSize: Int): ByteArray {
     // see https://learn.microsoft.com/en-us/windows/win32/seccertenroll/about-encoded-length-and-value-bytes
     // determine number of bytes
     val lengthBytes = if (dataSize <= 127) {
@@ -37,11 +37,11 @@ fun Asn1.derLengthBytes(dataSize: Int): UByteArray {
         val lengthByte = (0x80 or numberBytesForLength).toUByte()
         ubyteArrayOf(lengthByte) + buffer
     }
-    return lengthBytes
+    return lengthBytes.asByteArray()
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
-fun Asn1.derDecode(expectedTag: Asn1Tag, data: UByteArray): Asn1Node {
+fun Asn1.derDecode(expectedTag: Asn1Tag, data: ByteArray): Asn1Node {
     val node = derDecode(data)
     require(node.tag == expectedTag) {
         "Tag ${
@@ -61,8 +61,8 @@ fun Asn1.derDecode(expectedTag: Asn1Tag, data: UByteArray): Asn1Node {
  * @return pair of decoded tag and data
  */
 @OptIn(ExperimentalUnsignedTypes::class)
-fun Asn1.derDecode(encodedBytes: UByteArray): Asn1Node {
-    val parsedData = extractLeadingData(encodedBytes)
+fun Asn1.derDecode(encodedBytes: ByteArray): Asn1Node {
+    val parsedData = extractLeadingData(encodedBytes.asUByteArray())
     return nodeFromParsedData(parsedData)
 }
 
@@ -81,7 +81,7 @@ private fun Asn1.nodeFromParsedData(parsedData: ParsedData): Asn1Node =
         Asn1Node(parsedData.tag, Asn1Node.Content.Constructed(sequence.toTypedArray()))
     } else {
 //        require(originalEncodedBytes.size == (parsedData.tag.size + 1 + parsedData.numberLengthBytes + parsedData.dataLength)) { "Invalid data size when creating primitive node" }
-        Asn1Node(parsedData.tag, Asn1Node.Content.Primitive(parsedData.data))
+        Asn1Node(parsedData.tag, Asn1Node.Content.Primitive(parsedData.data.asByteArray()))
     }
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -95,7 +95,7 @@ private fun Asn1.extractLeadingData(data: UByteArray): ParsedData {
     } else {
         ubyteArrayOf(data[0])
     }
-    val tag = Asn1Tag(tagBytes)
+    val tag = Asn1Tag(tagBytes.asByteArray())
     val len = data[tag.size]
     val (numberLengthBytes: Int, dataLength: Int) = if (len < 128u) {
         Pair(0, len.toInt())

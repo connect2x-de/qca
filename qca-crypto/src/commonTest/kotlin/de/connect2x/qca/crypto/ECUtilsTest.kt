@@ -7,10 +7,10 @@ import kotlin.test.Test
 class ECUtilsTest {
     @Test
     fun shouldEncodeX962() {
-        encodeX962(
+        ECPointImpl(
             "0011111111".hexToByteArray(), // remove leading zero and fill to 32 Bytes
             "2222222222".hexToByteArray() // fill to 32 Bytes
-        )
+        ).encodeX962()
             .toHexString() shouldBe
                 "04" +
                 "00000000000000000000000000000000000000000000000000000000" + "11111111" +

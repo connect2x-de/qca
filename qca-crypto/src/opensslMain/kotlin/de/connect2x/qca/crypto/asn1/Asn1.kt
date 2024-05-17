@@ -9,7 +9,7 @@ import kotlinx.cinterop.*
 import org.openssl.*
 
 actual object Asn1 {
-    actual fun toObjectIdentifier(oid: String): UByteArray = withFree {
+    actual fun toObjectIdentifier(oid: String): ByteArray = withFree {
         memScoped {
             val objectIdentifier = OBJ_txt2obj(oid, 1).checkNotNullError().freeAfter(::ASN1_OBJECT_free)
 
@@ -20,14 +20,14 @@ actual object Asn1 {
                 UByteArray(result) {
                     safeBuffer[it]
                 }
-            } ?: throw IllegalStateException("Encoding failed")
+            }?.asByteArray() ?: throw IllegalStateException("Encoding failed")
         }
     }
 
-    actual fun toOctetString(data: UByteArray): UByteArray = withFree {
+    actual fun toOctetString(data: ByteArray): ByteArray = withFree {
         val octetString = ASN1_OCTET_STRING_new().checkNotNullError().freeAfter(::ASN1_OCTET_STRING_free)
         memScoped {
-            data.usePinned { pinnedData ->
+            data.asUByteArray().usePinned { pinnedData ->
                 ASN1_OCTET_STRING_set(octetString, pinnedData.addressOf(0), data.size).checkError()
             }
             val outRef = nativeHeap.alloc<CPointerVar<UByteVar>>()
@@ -41,7 +41,7 @@ actual object Asn1 {
                 outRefValue[it]
             }
 
-            der
+            der.asByteArray()
         }
     }
 }

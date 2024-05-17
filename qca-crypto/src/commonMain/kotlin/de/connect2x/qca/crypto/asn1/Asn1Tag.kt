@@ -6,15 +6,15 @@ data class Asn1Tag(
     val tagClass: TagClass,
     val tagNumber: Int,
     val encodingForm: DerEncodingForm,
-    val rawBytes: UByteArray
+    val rawBytes: ByteArray
 ) {
     // number of bytes to describe tag
     val size get() = rawBytes.size
 
-    constructor(data: UByteArray) : this(
-        tagClass = TagClass.from(data[0]),
-        tagNumber = parseTagNumber(data),
-        encodingForm = DerEncodingForm.from(data[0]),
+    constructor(data: ByteArray) : this(
+        tagClass = TagClass.from(data[0].toUByte()),
+        tagNumber = parseTagNumber(data.asUByteArray()),
+        encodingForm = DerEncodingForm.from(data[0].toUByte()),
         rawBytes = data
     )
 
@@ -26,7 +26,7 @@ data class Asn1Tag(
         tagClass = tagClass,
         tagNumber = tagNumber,
         encodingForm = encodingForm,
-        rawBytes = createByteRepresentation(tagNumber, tagClass, encodingForm)
+        rawBytes = createByteRepresentation(tagNumber, tagClass, encodingForm).asByteArray()
     )
 
     override fun equals(other: Any?): Boolean {

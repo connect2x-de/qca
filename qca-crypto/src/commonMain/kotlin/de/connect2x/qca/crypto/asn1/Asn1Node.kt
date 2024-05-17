@@ -28,7 +28,7 @@ data class Asn1Node(
         }
 
         // This `ASN1Node` is primitive, and is made up only of a collection of bytes.
-        data class Primitive(val data: UByteArray) : Content() {
+        data class Primitive(val data: ByteArray) : Content() {
             override fun equals(other: Any?): Boolean {
                 if (this === other) return true
                 if (other == null || this::class != other::class) return false

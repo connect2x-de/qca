@@ -49,7 +49,7 @@ class BrainpoolP256r1KeyTest {
         repeat(100) {
             val key1 = BrainpoolP256r1Key()
             val key2 = BrainpoolP256r1Key()
-            key1.sharedSecret(key2.publicKey) shouldBe key2.sharedSecret(key1.publicKey)
+            key1.sharedSecret(key2.publicKey).toHexString() shouldBe key2.sharedSecret(key1.publicKey).toHexString()
         }
     }
 }
