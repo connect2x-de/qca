@@ -1,13 +1,25 @@
 package de.connect2x.qca.crypto
 
-data class EncryptAesGcmResult(
-    val ciphertext: ByteArray,
-    val initialisationVector: ByteArray,
-    val authenticationTag: ByteArray,
-)
-
 expect fun ByteArray.encryptAes256Gcm(
     key: ByteArray,
     initializationVector: ByteArray = SecureRandom.nextBytes(12),
     authenticationData: ByteArray? = null,
-): EncryptAesGcmResult
+): ByteArray
+
+expect fun ByteArray.encryptAes128Ecb(
+    key: ByteArray,
+): ByteArray
+
+expect fun ByteArray.encryptAes128Cbc(
+    key: ByteArray,
+    initializationVector: ByteArray = SecureRandom.nextBytes(16)
+): ByteArray
+
+expect fun ByteArray.decryptAes128Cbc(
+    key: ByteArray,
+    initializationVector: ByteArray = SecureRandom.nextBytes(16)
+): ByteArray
+
+expect fun ByteArray.deriveAes128CbcCmac(
+    key: ByteArray,
+): ByteArray

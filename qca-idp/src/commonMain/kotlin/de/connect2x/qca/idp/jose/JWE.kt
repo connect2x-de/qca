@@ -174,16 +174,16 @@ internal fun JWE.Companion.encryptForIdp(
         ),
         payload = payload,
     ) { encryptInputData ->
-        val encryptAesGcmResult = encryptInputData.plaintext.encryptAes256Gcm(
+        val ciphertext = encryptInputData.plaintext.encryptAes256Gcm(
             key = deriveJWEKey(peerPublicKey, ephemeralKey),
             initializationVector = initializationVector,
             authenticationData = encryptInputData.authenticationData,
         )
         JWE.Companion.EncryptOutputData(
             encryptedKey = ByteArray(0), // not used
-            initializationVector = encryptAesGcmResult.initialisationVector,
-            ciphertext = encryptAesGcmResult.ciphertext,
-            authenticationTag = encryptAesGcmResult.authenticationTag,
+            initializationVector = initializationVector,
+            ciphertext = ciphertext.copyOfRange(0, ciphertext.size - 16),
+            authenticationTag = ciphertext.copyOfRange(ciphertext.size - 16, ciphertext.size),
         )
     }
 }
