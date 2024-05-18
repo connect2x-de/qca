@@ -52,4 +52,24 @@ class BrainpoolP256r1KeyTest {
             key1.sharedSecret(key2.publicKey).toHexString() shouldBe key2.sharedSecret(key1.publicKey).toHexString()
         }
     }
+
+    @Test
+    fun testPaceMapNonce() {
+        val privateKey = "0d7dffac3558c4c3c075a0479f4c3a4864dbd8e686cdb154dd0bdd0ba7ce4d51".hexToByteArray()
+        val key = BrainpoolP256r1Key(privateKey)
+        val nonce = "a44248628b8e8b94072ef3843c56e844".hexToByteArray()
+        val peerPublicKey = ("04" +
+                "5cac41779f548cbe714a08cbceb40f616b5efdd59dd3345802027dcb0c3fb02b" +
+                "20dc7a458b7744102de98d350d4399fec0f8cc5cce50317a2cee3cb418a4da41").hexToByteArray()
+
+        val ephemeralPrivateKey = "4c164b01d17b7c097b3640af1ebce0c88ed4b57738803872eec3261ebb9a89e7".hexToByteArray()
+        key.paceMapNonce(
+            peerPublicKey = peerPublicKey,
+            nonce = nonce,
+            ephemeralKey = BrainpoolP256r1Key(ephemeralPrivateKey)
+        ).toHexString() shouldBe
+                "04" +
+                "a1d37688f62647e4b7cceb64881142eeec48fcf148ba2b518e3246166ef8495c" +
+                "81d0644a59dd6927e7492a4bd52926957450beded208b2e616d03d9504f9fe12"
+    }
 }

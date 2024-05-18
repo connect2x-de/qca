@@ -40,23 +40,20 @@ class BrainpoolP256r1Key {
      * @param nonce Plain nonce queried from the peer entity
      * @param peerPublicKey First ephemeral public key received from the peer entity
      * @param ephemeralKeyGenerator function to generate a key (pair), mainly for testing purposes
-     * @return Derived ephemeral shared public key and the ephemeral private key pair
+     * @return Derived ephemeral shared public key
      */
     fun paceMapNonce(
-        nonce: ByteArray,
         peerPublicKey: ByteArray,
-        ephemeralKeyGenerator: () -> BrainpoolP256r1Key = { BrainpoolP256r1Key() }
-    ): Pair<ByteArray, BrainpoolP256r1Key> = withBrainpoolP256r1ECPointContext {
-        val noncePublicKey = ecPoint().multiply(nonce)
-        val sharedSecret = peerPublicKey.decodeX962().multiply(privateKey)
+        nonce: ByteArray,
+        ephemeralKey: BrainpoolP256r1Key,
+    ): ByteArray = withBrainpoolP256r1ECPointContext {
+        val sharedECPoint = peerPublicKey.decodeX962().multiply(privateKey)
 
-        val sharedPoint = noncePublicKey.add(sharedSecret)
+        val nonceECPoint = ecPoint().multiply(nonce)
+        val sharedPointWithNonce = nonceECPoint.add(sharedECPoint)
 
-        val ephemeralKey = ephemeralKeyGenerator()
-        val ephemeralSharedPublicKey =
-            sharedPoint.multiply(ephemeralKey.privateKey)
-                .encodeX962()
-        Pair(ephemeralSharedPublicKey, ephemeralKey)
+        sharedPointWithNonce.multiply(ephemeralKey.privateKey)
+            .encodeX962()
     }
 }
 
