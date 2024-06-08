@@ -1,6 +1,6 @@
 package de.connect2x.qca.idp
 
-import de.connect2x.qca.crypto.encodeX962
+import de.connect2x.qca.crypto.ECPointImpl
 import de.connect2x.qca.idp.jose.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
@@ -72,7 +72,7 @@ suspend fun idpAuthenticate(
                 (jwk["y"] as? JsonPrimitive)?.contentOrNull?.decodeBase64()?.toByteArray()
             ) { "y missing in puk_idp_enc" }
 
-        encodeX962(x, y)
+        ECPointImpl(x, y).encodeX962()
     }
     val challenge = httpClient.get(challengeUrl).body<Challenge>()
     log.debug { "got challenge from IDP: $challenge" }
