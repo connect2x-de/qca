@@ -5,7 +5,6 @@ import de.connect2x.qca.idp.jose.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -34,9 +33,9 @@ suspend fun idpAuthenticate(
     idpUrl: String,
     signingPublicKey: ByteArray,
     signChallenge: SignChallenge,
-    engine: HttpClientEngine? = null,
+    httpClientFactory: (config: HttpClientConfig<*>.() -> Unit) -> HttpClient = { HttpClient(it) },
 ): String = coroutineScope {
-    val config: HttpClientConfig<*>.() -> Unit = {
+    val httpClient = httpClientFactory {
         expectSuccess = true
         followRedirects = false
         install(ContentNegotiation) {
@@ -47,8 +46,6 @@ suspend fun idpAuthenticate(
             )
         }
     }
-
-    val httpClient = if (engine != null) HttpClient(engine, config) else HttpClient(config)
 
     val oidcWellKnown =
         httpClient.get {

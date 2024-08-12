@@ -1,5 +1,5 @@
 rootProject.name = "qca"
-include(":qca-crypto", ":qca-idp", ":qca-raw")
+include(":qca-crypto", ":qca-idp", ":qca-raw", ":qca-nfc")
 
 pluginManagement {
     repositories {

@@ -12,12 +12,12 @@ expect fun ByteArray.encryptAes128Ecb(
 
 expect fun ByteArray.encryptAes128Cbc(
     key: ByteArray,
-    initializationVector: ByteArray = SecureRandom.nextBytes(16)
+    initializationVector: ByteArray = ByteArray(16)
 ): ByteArray
 
 expect fun ByteArray.decryptAes128Cbc(
     key: ByteArray,
-    initializationVector: ByteArray = SecureRandom.nextBytes(16)
+    initializationVector: ByteArray = ByteArray(16)
 ): ByteArray
 
 expect fun ByteArray.deriveAes128CbcCmac(

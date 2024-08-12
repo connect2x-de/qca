@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "de.connect2x"
-    version = withVersionSuffix("0.0.1")
+    version = withVersionSuffix("0.0.2")
 
     repositories {
         mavenLocal()
@@ -18,12 +18,13 @@ allprojects {
         maven("https://gitlab.com/api/v4/projects/26519650/packages/maven")
     }
 
-    dependencyLocking {
-        lockMode = LockMode.LENIENT
-        lockAllConfigurations()
-    }
+    if (System.getenv("WITH_LOCK")?.toBoolean() == true) {
+        dependencyLocking {
+            lockAllConfigurations()
+        }
 
-    val dependenciesForAll by tasks.registering(DependencyReportTask::class) { }
+        val dependenciesForAll by tasks.registering(DependencyReportTask::class) { }
+    }
 }
 
 subprojects {
