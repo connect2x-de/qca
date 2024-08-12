@@ -147,7 +147,7 @@ test:linux:
     - *if-merge-request-or-main
   script:
     - ./gradlew
-      jvmTest
+      {jvm,testReleaseUnit}Test
       --stacktrace
 
 security:dependencies:
@@ -211,6 +211,6 @@ publish:linux:
     - *if-release
   script:
     - ./gradlew
-      publish{KotlinMultiplatform,Jvm}PublicationToGitLabRepository
+      publish{KotlinMultiplatform,Jvm,AndroidRelease}PublicationToGitLabRepository
       --stacktrace
       --no-configuration-cache
