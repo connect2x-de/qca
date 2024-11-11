@@ -2,6 +2,7 @@ package de.connect2x.qca.file
 
 import de.connect2x.qca.idp.idpAuthenticate
 import io.ktor.client.*
+import io.ktor.client.engine.*
 
 /**
  * Allows to authenticate against the gematik IDP with certificate files
@@ -14,12 +15,14 @@ suspend fun idpAuthenticateWithFile(
     idpUrl: String,
     signingPublicKey: ByteArray,
     signingPrivateKey: ByteArray,
-    httpClientFactory: (config: HttpClientConfig<*>.() -> Unit) -> HttpClient = { HttpClient(it) },
+    httpClientEngine: HttpClientEngine? = null,
+    httpClientConfig: (HttpClientConfig<*>.() -> Unit)? = null,
 ): String =
     idpAuthenticate(
         challengeUrl = challengeUrl,
         idpUrl = idpUrl,
         signingPublicKey = signingPublicKey,
         signChallenge = SignChallengeWithPrivateKey(signingPrivateKey),
-        httpClientFactory = httpClientFactory,
+        httpClientEngine = httpClientEngine,
+        httpClientConfig = httpClientConfig,
     )
