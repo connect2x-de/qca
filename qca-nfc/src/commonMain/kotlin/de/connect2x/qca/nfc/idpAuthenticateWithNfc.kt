@@ -4,6 +4,7 @@ import de.connect2x.qca.idp.idpAuthenticate
 import de.connect2x.qca.nfc.card.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
+import io.ktor.client.engine.*
 
 private val log = KotlinLogging.logger { }
 
@@ -16,7 +17,8 @@ suspend fun idpAuthenticateWithNfc(
     can: String,
     pin: String,
     nfcCardFactory: NfcCardFactory,
-    httpClientFactory: (config: HttpClientConfig<*>.() -> Unit) -> HttpClient = { HttpClient(it) },
+    httpClientEngine: HttpClientEngine? = null,
+    httpClientConfig: (HttpClientConfig<*>.() -> Unit)? = null,
 ): String =
     useNfcCardSecured(nfcCardFactory = nfcCardFactory, can = can) {
         val cardInfo = retrieveCardInfo()
@@ -29,6 +31,7 @@ suspend fun idpAuthenticateWithNfc(
             signChallenge = { challenge, _ ->
                 signChallenge(challenge, cardInfo)
             },
-            httpClientFactory = httpClientFactory,
+            httpClientEngine = httpClientEngine,
+            httpClientConfig = httpClientConfig,
         )
     }

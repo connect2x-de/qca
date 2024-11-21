@@ -1,21 +1,20 @@
 [versions]
 kotlinJvmTarget = "11"
-kotlin = "2.0.0" # https://github.com/JetBrains/kotlin/releases
+kotlin = "2.0.21" # https://github.com/JetBrains/kotlin/releases
 android-gradle-plugin = "8.2.2" # https://developer.android.com/reference/tools/gradle-api
 dokka = "1.9.20" # https://github.com/Kotlin/dokka/releases"
 downloadGradlePlugin = "5.6.0" # https://github.com/michel-kraemer/gradle-download-task/releases
-bouncyCastle = "1.78.1" # https://www.bouncycastle.org/java.html
-trixnity = "4.3.3" # https://gitlab.com/trixnity/trixnity/-/releases
-trixnityOpensslBinaries = "1.0.3" # https://gitlab.com/trixnity/trixnity-openssl-binaries/-/releases
+bouncyCastle = "1.79" # https://www.bouncycastle.org/download/bouncy-castle-java/#release-notes
+trixnityOpensslBinaries = "1.0.5" # https://gitlab.com/trixnity/trixnity-openssl-binaries/-/releases
 
-kotlinx-coroutines = "1.8.1" # https://github.com/Kotlin/kotlinx.coroutines/releases
-kotlinx-serialization = "1.7.1" # https://github.com/Kotlin/kotlinx.serialization/releases
+kotlinx-coroutines = "1.9.0" # https://github.com/Kotlin/kotlinx.coroutines/releases
+kotlinx-serialization = "1.7.3" # https://github.com/Kotlin/kotlinx.serialization/releases
 
-okio = "3.9.0" # https://square.github.io/okio/changelog/
-ktor = "2.3.12" # https://github.com/ktorio/ktor/releases
+okio = "3.9.1" # https://square.github.io/okio/changelog/
+ktor = "3.0.1" # https://github.com/ktorio/ktor/releases
 
 oshaiKotlinLogging = "7.0.0" # https://github.com/oshai/kotlin-logging/releases
-logback = "1.5.6" # https://github.com/qos-ch/logback/tags
+logback = "1.5.12" # https://github.com/qos-ch/logback/tags
 
 kotest = "5.9.1" # https://github.com/kotest/kotest/releases
 
