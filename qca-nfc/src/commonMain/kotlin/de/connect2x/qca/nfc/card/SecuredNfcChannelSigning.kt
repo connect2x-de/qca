@@ -37,7 +37,7 @@ internal suspend fun SecuredNfcChannel.retrieveSigningCertificate(cardInfo: NfcC
     return buffer
 }
 
-private fun ByteArray.toInt(): Int {
+internal fun ByteArray.toInt(): Int {
     require(size <= Int.SIZE_BYTES)
     return fold(0) { number, nextByte ->
         (number shl 8) or nextByte.toInt()
