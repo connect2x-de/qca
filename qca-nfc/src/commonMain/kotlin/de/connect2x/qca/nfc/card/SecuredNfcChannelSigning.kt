@@ -1,10 +1,12 @@
 package de.connect2x.qca.nfc.card
 
-import de.connect2x.qca.crypto.asn1.Asn1
-import de.connect2x.qca.crypto.asn1.Asn1Node
-import de.connect2x.qca.crypto.asn1.derDecode
 import de.connect2x.qca.crypto.sha256
-import de.connect2x.qca.nfc.card.command.*
+import de.connect2x.qca.encoding.FileControlParameter
+import de.connect2x.qca.nfc.card.command.readCommandBinary
+import de.connect2x.qca.nfc.card.command.selectCommandDfEsign
+import de.connect2x.qca.nfc.card.command.selectCommandFile
+import de.connect2x.qca.nfc.card.command.selectCommandSigningKey
+import de.connect2x.qca.nfc.card.command.signCommandPsoComputeDigitalSignature
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val log = KotlinLogging.logger { }
@@ -17,12 +19,10 @@ internal suspend fun SecuredNfcChannel.retrieveSigningCertificate(cardInfo: NfcC
 
     log.debug { "select certificate DF.ESIGN" }
     // file control parameter
-    val fcpBytes = transmit(selectCommandFile(cardInfo.signingCertificateFileIdentifier)).data
-    val fcpAsn1 = Asn1.derDecode(fcpBytes).content
-    check(fcpAsn1 is Asn1Node.Content.Constructed)
-    val fcpAsn1EndOfFilePosition = fcpAsn1.nodes.find { it.tag.tagNumber == 0x05 }?.content
-    check(fcpAsn1EndOfFilePosition is Asn1Node.Content.Primitive)
-    val endOfFilePosition = fcpAsn1EndOfFilePosition.data.toInt()
+    val fcpData = transmit(selectCommandFile(cardInfo.signingCertificateFileIdentifier)).data
+    val fcp = FileControlParameter.decodeFromDer(fcpData)
+    val endOfFilePosition = fcp.readSize?.intValue()
+    requireNotNull(endOfFilePosition)
 
     var buffer = ByteArray(0)
     var offset = 0
@@ -35,13 +35,6 @@ internal suspend fun SecuredNfcChannel.retrieveSigningCertificate(cardInfo: NfcC
     } while (offset < endOfFilePosition)
     log.debug { "finished read certificate DF.ESIGN" }
     return buffer
-}
-
-internal fun ByteArray.toInt(): Int {
-    require(size <= Int.SIZE_BYTES)
-    return fold(0) { number, nextByte ->
-        (number shl 8) or nextByte.toInt()
-    }
 }
 
 

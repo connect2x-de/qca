@@ -22,6 +22,7 @@ kotlin {
         }
         commonMain {
             dependencies {
+                implementation(project(":qca-encoding"))
                 implementation(project(":qca-crypto"))
                 implementation(project(":qca-idp"))
                 implementation(libs.oshai.logging)
