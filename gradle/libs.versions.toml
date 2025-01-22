@@ -4,7 +4,7 @@ kotlin = "2.1.0" # https://github.com/JetBrains/kotlin/releases
 android-gradle-plugin = "8.2.2" # https://developer.android.com/reference/tools/gradle-api
 dokka = "1.9.20" # https://github.com/Kotlin/dokka/releases"
 downloadGradlePlugin = "5.6.0" # https://github.com/michel-kraemer/gradle-download-task/releases
-bouncyCastle = "1.80" # https://www.bouncycastle.org/download/bouncy-castle-java/#release-notes
+bouncyCastle = "1.79" # https://www.bouncycastle.org/download/bouncy-castle-java/#release-notes
 trixnityOpensslBinaries = "1.0.5" # https://gitlab.com/trixnity/trixnity-openssl-binaries/-/releases
 signum = "3.12.1" # https://github.com/a-sit-plus/signum/releases/tag/3.12.1
 
