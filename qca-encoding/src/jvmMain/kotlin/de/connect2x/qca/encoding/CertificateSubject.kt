@@ -5,6 +5,7 @@ import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.ASN1String
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue
 import org.bouncycastle.asn1.x500.X500Name
+import org.bouncycastle.cert.X509CertificateHolder
 
 data class CertificateSubject(val entries: List<Map<Attribute, String>>) {
     operator fun get(key: Attribute): String? = entries.firstNotNullOfOrNull { it[key] }
@@ -133,17 +134,23 @@ data class CertificateSubject(val entries: List<Map<Attribute, String>>) {
             )
         }
 
-        fun of(name: X500Name): CertificateSubject {
+        fun fromName(name: X500Name): CertificateSubject {
             return CertificateSubject(
                 name.rdNs.map { rdn ->
                     rdn.typesAndValues.mapNotNull(::parseAttribute).toMap()
                 }
             )
         }
+
+        fun fromCertificate(certificate: X509CertificateHolder): CertificateSubject =
+            fromName(certificate.subject)
+
+        fun fromCertificate(data: ByteArray): CertificateSubject =
+            fromCertificate(X509CertificateHolder(data))
     }
 }
 
 private fun ASN1Primitive.toASN1String() = this as? ASN1String
 
 val X500Name.parsed: CertificateSubject
-    get() = CertificateSubject.of(this)
+    get() = CertificateSubject.fromName(this)
