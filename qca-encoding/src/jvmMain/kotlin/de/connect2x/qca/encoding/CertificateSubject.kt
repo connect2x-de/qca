@@ -134,13 +134,8 @@ data class CertificateSubject(val entries: List<Map<Attribute, String>>) {
             )
         }
 
-        fun fromName(name: X500Name): CertificateSubject {
-            return CertificateSubject(
-                name.rdNs.map { rdn ->
-                    rdn.typesAndValues.mapNotNull(::parseAttribute).toMap()
-                }
-            )
-        }
+        fun fromName(name: X500Name): CertificateSubject =
+            CertificateSubject(name.rdNs.map { it.typesAndValues.mapNotNull(::parseAttribute).toMap() })
 
         fun fromCertificate(certificate: X509CertificateHolder): CertificateSubject =
             fromName(certificate.subject)
