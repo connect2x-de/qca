@@ -28,6 +28,11 @@ kotlin {
                 api(libs.signum)
             }
         }
+        jvmMain {
+            dependencies {
+                implementation(libs.bundles.bouncycastle)
+            }
+        }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
