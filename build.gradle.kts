@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "de.connect2x"
-    version = withVersionSuffix("0.0.4")
+    version = withVersionSuffix("0.0.5")
 
     repositories {
         mavenLocal()
