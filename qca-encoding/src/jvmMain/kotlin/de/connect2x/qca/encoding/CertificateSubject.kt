@@ -151,6 +151,3 @@ data class CertificateSubject(val entries: List<Map<Attribute, String>>) {
 }
 
 private fun ASN1Primitive.toASN1String() = this as? ASN1String
-
-val X500Name.parsed: CertificateSubject
-    get() = CertificateSubject.fromName(this)
