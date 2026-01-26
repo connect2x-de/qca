@@ -1,12 +1,12 @@
 package de.connect2x.qca.nfc
 
+import de.connect2x.lognity.api.logger.Logger
 import de.connect2x.qca.idp.idpAuthenticate
 import de.connect2x.qca.nfc.card.*
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.engine.*
 
-private val log = KotlinLogging.logger { }
+private val log = Logger("de.connect2x.qca.nfc.idpAuthenticateWithNfc")
 
 /**
  * Allows to authenticate against the gematik IDP with NFC

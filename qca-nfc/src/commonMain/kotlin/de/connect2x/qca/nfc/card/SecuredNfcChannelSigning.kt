@@ -1,5 +1,6 @@
 package de.connect2x.qca.nfc.card
 
+import de.connect2x.lognity.api.logger.Logger
 import de.connect2x.qca.crypto.sha256
 import de.connect2x.qca.encoding.FileControlParameter
 import de.connect2x.qca.nfc.card.command.readCommandBinary
@@ -7,9 +8,8 @@ import de.connect2x.qca.nfc.card.command.selectCommandDfEsign
 import de.connect2x.qca.nfc.card.command.selectCommandFile
 import de.connect2x.qca.nfc.card.command.selectCommandSigningKey
 import de.connect2x.qca.nfc.card.command.signCommandPsoComputeDigitalSignature
-import io.github.oshai.kotlinlogging.KotlinLogging
 
-private val log = KotlinLogging.logger { }
+private val log = Logger("de.connect2x.qca.nfc.card.SecuredNfcChannelSigning")
 
 internal suspend fun SecuredNfcChannel.retrieveSigningCertificate(cardInfo: NfcCardInfo): ByteArray {
     log.debug { "open DF.ESIGN" }

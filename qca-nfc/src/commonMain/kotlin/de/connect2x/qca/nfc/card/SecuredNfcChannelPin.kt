@@ -1,13 +1,13 @@
 package de.connect2x.qca.nfc.card
 
+import de.connect2x.lognity.api.logger.Logger
 import de.connect2x.qca.nfc.card.apdu.ResponseException
 import de.connect2x.qca.nfc.card.apdu.ResponseStatus
 import de.connect2x.qca.nfc.card.command.EncryptedPinFormat2
 import de.connect2x.qca.nfc.card.command.pinCommandResetRetryCounterWithPukWithoutNewSecret
 import de.connect2x.qca.nfc.card.command.pinCommandVerify
-import io.github.oshai.kotlinlogging.KotlinLogging
 
-private val log = KotlinLogging.logger { }
+private val log = Logger("de.connect2x.qca.nfc.card.SecuredNfcChannelPin")
 
 internal suspend fun SecuredNfcChannel.verifyPin(pin: String, cardInfo: NfcCardInfo) {
     log.debug { "verify PIN" }

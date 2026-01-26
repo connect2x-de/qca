@@ -1,34 +1,30 @@
+import de.connect2x.conventions.withIos
+import de.connect2x.conventions.withJvm
+
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlinx.serialization)
+    alias(sharedLibs.plugins.kotlin.multiplatform)
+    alias(sharedLibs.plugins.kotlin.serialization)
 }
 
 kotlin {
-    jvm()
-    iosArm64()
-    iosSimulatorArm64()
-    iosX64()
+    withJvm()
+    withIos()
 
     sourceSets {
-        commonMain {
-            dependencies {
-                implementation(project(":qca-crypto"))
-                implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.serialization.json)
-                implementation(libs.oshai.logging)
+        commonMain.dependencies {
+            api(libs.okio)
+            api(sharedLibs.kotlinx.serialization.core)
+            api(sharedLibs.kotlinx.serialization.json)
+            api(sharedLibs.ktor.client.core)
 
-                implementation(libs.okio)
-                api(libs.ktor.client.core)
-                implementation(libs.ktor.client.contentNegotiation)
-                implementation(libs.ktor.serialization.kotlinx.json)
-            }
-        }
-        commonTest {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotest.assertions.core)
-                implementation(libs.kotlinx.coroutines.test)
-            }
+            implementation(sharedLibs.ktor.http)
+            implementation(sharedLibs.ktor.utils)
+            implementation(sharedLibs.ktor.client.contentNegotiation)
+            implementation(sharedLibs.ktor.serialization.kotlinx.json)
+
+            implementation(projects.qcaCrypto)
+            implementation(sharedLibs.lognity.api)
+            implementation(sharedLibs.kotlinx.coroutines.core)
         }
     }
 }

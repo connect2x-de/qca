@@ -1,8 +1,8 @@
 package de.connect2x.qca.idp
 
+import de.connect2x.lognity.api.logger.Logger
 import de.connect2x.qca.crypto.ECPointImpl
 import de.connect2x.qca.idp.jose.*
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.*
@@ -13,7 +13,7 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.utils.io.core.*
+import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.SerialName
@@ -22,7 +22,7 @@ import kotlinx.serialization.json.*
 import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.toByteString
 
-private val log = KotlinLogging.logger {}
+private val log = Logger("de.connect2x.qca.idp.idpAuthenticate")
 
 /**
  * Authentication flow against an IDP using the [challengeUrl] of a Relying Party and returning the redirect from the IDP.

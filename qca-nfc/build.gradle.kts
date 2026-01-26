@@ -1,53 +1,45 @@
+import de.connect2x.conventions.withAndroidLibrary
+import de.connect2x.conventions.withIos
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.android.library)
+    alias(sharedLibs.plugins.kotlin.multiplatform)
+    alias(sharedLibs.plugins.kotlin.serialization)
+    alias(sharedLibs.plugins.android.library)
 }
 
 kotlin {
-    androidTarget {
-        compilations.all {
-            kotlinOptions.jvmTarget = libs.versions.kotlinJvmTarget.get()
-        }
-        publishLibraryVariants("release")
-    }
-    iosArm64()
-    iosSimulatorArm64()
-    iosX64()
+    withAndroidLibrary()
+    withIos()
+
+    applyDefaultHierarchyTemplate()
 
     sourceSets {
-        all {
-            languageSettings.optIn("kotlin.RequiresOptIn")
+        matching(KotlinSourceSet::isNative).configureEach {
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
-        commonMain {
-            dependencies {
-                implementation(project(":qca-encoding"))
-                implementation(project(":qca-crypto"))
-                implementation(project(":qca-idp"))
-                implementation(libs.oshai.logging)
 
-                implementation(libs.okio)
-            }
-        }
-        commonTest {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotest.assertions.core)
-                implementation(libs.kotlinx.coroutines.test)
-            }
+        commonMain.dependencies {
+            api(sharedLibs.ktor.client.core)
+
+            implementation(projects.qcaEncoding)
+            implementation(projects.qcaIdp)
+            implementation(projects.qcaCrypto)
+
+            implementation(libs.okio)
+            implementation(sharedLibs.lognity.api)
+            implementation(sharedLibs.kotlinx.coroutines.core)
         }
     }
+}
+
+
+private fun KotlinSourceSet.isNative(): Boolean = when {
+    name == "nativeMain" || name == "nativeTest" -> true
+    dependsOn.any { it.isNative() } -> true
+    else -> false
 }
 
 android {
     namespace = "de.connect2x.qca.nfc"
-    compileSdk = 33
-    defaultConfig {
-        minSdk = 24
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(libs.versions.kotlinJvmTarget.get())
-        targetCompatibility = JavaVersion.toVersion(libs.versions.kotlinJvmTarget.get())
-    }
 }

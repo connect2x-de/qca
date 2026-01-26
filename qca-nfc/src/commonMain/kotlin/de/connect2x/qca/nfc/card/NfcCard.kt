@@ -1,9 +1,9 @@
 package de.connect2x.qca.nfc.card
 
+import de.connect2x.lognity.api.logger.Logger
 import de.connect2x.qca.nfc.card.pace.establishPaceSecuredNfcChannel
-import io.github.oshai.kotlinlogging.KotlinLogging
 
-private val log = KotlinLogging.logger { }
+private val log = Logger("de.connect2x.qca.nfc.card.NfcCard")
 
 expect class NfcCard
 
