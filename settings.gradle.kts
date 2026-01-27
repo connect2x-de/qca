@@ -1,28 +1,31 @@
-rootProject.name = "qca"
-include(":qca-crypto", ":qca-encoding", ":qca-idp", ":qca-raw", ":qca-nfc")
+@file:Suppress("UnstableApiUsage")
 
 pluginManagement {
     repositories {
-        google()
-        mavenCentral()
         gradlePluginPortal()
+        maven("https://gitlab.com/api/v4/projects/68438621/packages/maven") // c2x Conventions
     }
 }
 
 dependencyResolutionManagement {
     repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-buildCache {
-    local {
-        directory = File(rootDir, ".gradle").resolve("build-cache")
-        removeUnusedEntriesAfterDays = 30
+        maven("https://gitlab.com/api/v4/projects/68438621/packages/maven") // c2x Conventions
     }
 }
 
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version ("0.8.0") // https://github.com/gradle/foojay-toolchains/tags
+    id("de.connect2x.conventions.c2x-settings-plugin") version "20260127.085233" // https://gitlab.com/connect2x/c2x-conventions/-/packages
 }
+
+rootProject.name = "qca"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+include(
+    ":qca-crypto",
+    ":qca-encoding",
+    ":qca-idp",
+    ":qca-raw",
+    ":qca-nfc",
+)
+

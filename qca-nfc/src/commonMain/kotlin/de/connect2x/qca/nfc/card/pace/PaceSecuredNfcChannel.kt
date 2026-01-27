@@ -1,5 +1,7 @@
 package de.connect2x.qca.nfc.card.pace
 
+import de.connect2x.lognity.api.logger.Logger
+import de.connect2x.lognity.api.logger.error
 import de.connect2x.qca.crypto.BrainpoolP256r1Key
 import de.connect2x.qca.crypto.decryptAes128Cbc
 import de.connect2x.qca.nfc.card.*
@@ -8,9 +10,8 @@ import de.connect2x.qca.nfc.card.apdu.ResponseApdu
 import de.connect2x.qca.nfc.card.apdu.ResponseException
 import de.connect2x.qca.nfc.card.apdu.ResponseStatus
 import de.connect2x.qca.nfc.card.pace.EstablishPaceSecuredNfcChannel.allSteps
-import io.github.oshai.kotlinlogging.KotlinLogging
 
-private val log = KotlinLogging.logger { }
+private val log = Logger("de.connect2x.qca.nfc.card.pace")
 
 internal class PaceSecuredNfcChannel(
     private val nfcChannel: NfcChannel,

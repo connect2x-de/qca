@@ -1,14 +1,14 @@
 package de.connect2x.qca.nfc.card
 
+import de.connect2x.lognity.api.logger.Logger
 import de.connect2x.qca.crypto.asn1.Asn1
 import de.connect2x.qca.crypto.asn1.Asn1Node
 import de.connect2x.qca.crypto.asn1.Asn1Tag
 import de.connect2x.qca.crypto.asn1.derDecode
 import de.connect2x.qca.nfc.card.command.readCommandCardType
 import de.connect2x.qca.nfc.card.command.readCommandEfVersion2
-import io.github.oshai.kotlinlogging.KotlinLogging
 
-private val log = KotlinLogging.logger { }
+private val log = Logger(" de.connect2x.qca.nfc.card.NfcCardInfo")
 
 data class NfcCardInfo(
     val type: CardType,

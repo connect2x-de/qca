@@ -16,7 +16,7 @@ variables:
   GRADLE_OPTS: -Dorg.gradle.daemon=false
   GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
   KONAN_DATA_DIR: $CI_PROJECT_DIR/.konan
-  BUILD_LINUX_IMAGE_NAME: registry.gitlab.com/trixnity/trixnity/trixnity-build-linux:latest
+  BUILD_LINUX_IMAGE_NAME:  registry.gitlab.com/connect2x/build-infrastructure/kmp-dockerfiles/kmp-dockerfiles-base:latest
 
 .cache-linux: &cache-linux
   - key: global-qca-cache-linux
@@ -184,9 +184,10 @@ security:dependencies:
     - trivy repo ./ --exit-code 0 --format template --template "@/contrib/gitlab.tpl" --output report.json
     - trivy repo ./ --exit-code 1 --severity CRITICAL
 
-publish:mac:
+publish:release:
   stage: publish
   tags: [ "connect2x-mac" ]
+  timeout: 2h
   cache:
     - *pull-cache-mac
   artifacts: *artifact-reports
@@ -195,22 +196,7 @@ publish:mac:
     - *if-release
   script:
     - ./gradlew
-      publish{IosArm64,IosSimulatorArm64,IosX64}PublicationToGitLabRepository
-      --stacktrace
-      --no-configuration-cache
-
-publish:linux:
-  stage: publish
-  tags: [ "connect2x-linux" ]
-  image: $BUILD_LINUX_IMAGE_NAME
-  cache:
-    - *pull-cache-linux
-  artifacts: *artifact-reports
-  rules:
-    - *if-main
-    - *if-release
-  script:
-    - ./gradlew
-      publish{KotlinMultiplatform,Jvm,AndroidRelease}PublicationToGitLabRepository
+      publishAllPublicationsToGitLabRepository
+      publishAndReleaseToMavenCentral
       --stacktrace
       --no-configuration-cache

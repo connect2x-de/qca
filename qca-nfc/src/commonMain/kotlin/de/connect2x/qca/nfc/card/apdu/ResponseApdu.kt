@@ -1,8 +1,8 @@
 package de.connect2x.qca.nfc.card.apdu
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import de.connect2x.lognity.api.logger.Logger
 
-private val log = KotlinLogging.logger { }
+private val log = Logger("de.connect2x.qca.nfc.card.apdu.ResponseApdu")
 
 /**
  * APDU Response

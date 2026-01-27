@@ -1,109 +1,104 @@
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+
+import de.connect2x.conventions.withIos
+import de.connect2x.conventions.withJvm
+import de.undercouch.gradle.tasks.download.Download
+import org.gradle.kotlin.dsl.sourceSets
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.konan.target.KonanTarget
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    alias(sharedLibs.plugins.kotlin.multiplatform)
     alias(libs.plugins.download)
 }
 
-val trixnityOpensslBinariesRoot = layout.buildDirectory.get().asFile
-    .resolve("trixnity-openssl-binaries").resolve(libs.versions.trixnityOpensslBinaries.get())
-
-private fun trixnityOpensslBinariesTarget(target: KonanTarget) =
-    trixnityOpensslBinariesRoot.resolve("openssl").resolve(target.name)
-
-fun trixnityOpensslBinariesInclude(target: KonanTarget) = trixnityOpensslBinariesTarget(target).resolve("include")
-fun trixnityOpensslBinariesLib(target: KonanTarget) =
-    trixnityOpensslBinariesTarget(target).resolve("lib").resolve("libcrypto.a")
-
 kotlin {
-    val kotlinJvm = libs.versions.kotlinJvmTarget.get()
-    jvmToolchain(kotlinJvm.toInt())
-    jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = kotlinJvm
-        }
-        testRuns["test"].executionTask.configure {
-            useJUnitPlatform()
-        }
-    }
-    iosArm64()
-    iosSimulatorArm64()
-    iosX64()
+    withJvm()
+    withIos()
 
-    applyDefaultHierarchyTemplate()
-
-    targets.withType<KotlinNativeTarget> {
-        compilations {
-            "main" {
-                cinterops {
-                    val libopenssl by creating {
-                        defFile("src/opensslMain/cinterop/libopenssl.def")
-                        packageName("org.openssl")
-                        includeDirs.allHeaders(trixnityOpensslBinariesInclude(target.konanTarget).absolutePath)
-                        tasks.named(interopProcessingTaskName) {
-                            dependsOn("trixnityBinaries")
-                        }
-                    }
-                }
-
-                kotlinOptions.freeCompilerArgs =
-                    listOf("-include-binary", trixnityOpensslBinariesLib(target.konanTarget).absolutePath)
+    applyDefaultHierarchyTemplate {
+        common {
+            group("openssl") {
+                withNative()
             }
         }
     }
+
+    configureOpenssl(
+        version = libs.versions.trixnityOpensslBinaries.get(),
+    )
 
     sourceSets {
-        all {
-            languageSettings.optIn("kotlin.RequiresOptIn")
+        matching(KotlinSourceSet::isOpenssl).configureEach {
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
-        commonMain {
-            dependencies {
-            }
+
+        jvmMain.dependencies {
+            api(libs.bundles.bouncycastle)
         }
-        commonTest {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotest.assertions.core)
-                implementation(libs.kotlinx.coroutines.test)
-            }
-        }
-        jvmMain {
-            dependencies {
-                implementation(libs.bundles.bouncycastle)
-            }
-        }
-        val opensslMain by creating {
-            dependsOn(nativeMain.get())
-        }
-        appleMain.get().dependsOn(opensslMain)
     }
 }
 
-val tmpDir = layout.buildDirectory.get().asFile.resolve("tmp")
-val opensslBinariesZipDir =
-    tmpDir.resolve("trixnity-openssl-binaries-${libs.versions.trixnityOpensslBinaries.get()}.zip")
-
-val downloadOpensslBinaries by tasks.registering(de.undercouch.gradle.tasks.download.Download::class) {
-    src("https://gitlab.com/api/v4/projects/57407788/packages/generic/build/v${libs.versions.trixnityOpensslBinaries.get()}/build.zip")
-    dest(opensslBinariesZipDir)
-    overwrite(false)
+private fun KotlinSourceSet.isOpenssl(): Boolean = when {
+    name == "opensslMain" || name == "opensslTest" -> true
+    dependsOn.any { it.isOpenssl() } -> true
+    else -> false
 }
 
-val extractOpensslBinaries by tasks.registering(Copy::class) {
-    from(zipTree(opensslBinariesZipDir)) {
-        include("build/**")
-        eachFile {
-            relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
+private fun KotlinMultiplatformExtension.configureOpenssl(
+    version: String,
+) {
+
+    val download = tasks.register<Download>("downloadOpensslBinaries") {
+        src("https://gitlab.com/api/v4/projects/57407788/packages/generic/build/v$version/build.zip")
+        dest(layout.buildDirectory.file("tmp/openssl-binaries-$version.zip"))
+        overwrite(false)
+    }
+
+    val extract = tasks.register<Copy>("extractOpensslBinaries") {
+        from(zipTree(download.map { it.dest })) {
+            include("build/**")
+            eachFile {
+                relativePath = RelativePath(
+                    true, *relativePath.segments.drop(1).toTypedArray()
+                )
+            }
+        }
+        into(layout.buildDirectory.dir("openssl-binaries/$version"))
+    }
+
+    val binaries = extract.map { it.destinationDir }
+
+    fun include(target: KonanTarget) = binaries.map { it.resolve("openssl/${target.name}/include") }
+
+    fun lib(target: KonanTarget) =
+        binaries.map { it.resolve("openssl/${target.name}/lib/libcrypto.a") }
+
+    targets.withType<KotlinNativeTarget> {
+        val target = konanTarget
+
+        compilations.named { it == "main" }.configureEach {
+            cinterops.register("libopenssl") {
+                defFile("src/opensslMain/cinterop/libopenssl.def")
+                packageName("org.openssl")
+
+                val includeDir = include(target)
+
+                includeDirs.allHeaders(includeDir)
+
+                // This is necessary as allHeaders does not properly set up the task dependency ...
+                tasks.named { it == interopProcessingTaskName }.configureEach {
+                    inputs.dir(includeDir)
+                }
+            }
+
+            compileTaskProvider.configure {
+                compilerOptions.freeCompilerArgs.add(
+                    lib(target).map { "-include-binary=${it.canonicalPath}" })
+            }
         }
     }
-    into(trixnityOpensslBinariesRoot)
-    outputs.cacheIf { true }
-    inputs.files(downloadOpensslBinaries)
-    dependsOn(downloadOpensslBinaries)
-}
-
-val trixnityBinaries by tasks.registering {
-    dependsOn(extractOpensslBinaries)
 }

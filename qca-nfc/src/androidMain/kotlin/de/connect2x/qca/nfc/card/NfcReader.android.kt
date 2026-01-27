@@ -2,9 +2,9 @@ package de.connect2x.qca.nfc.card
 
 import android.nfc.TagLostException
 import android.nfc.tech.IsoDep
-import io.github.oshai.kotlinlogging.KotlinLogging
+import de.connect2x.lognity.api.logger.Logger
 
-private val log = KotlinLogging.logger { }
+private val log = Logger("de.connect2x.qca.nfc.card.NfcReader")
 
 private const val ISO_DEP_TIMEOUT = 2500
 

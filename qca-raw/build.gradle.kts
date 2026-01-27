@@ -1,32 +1,23 @@
+import de.connect2x.conventions.withJvm
+
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlinx.serialization)
+    alias(sharedLibs.plugins.kotlin.multiplatform)
+    alias(sharedLibs.plugins.kotlin.serialization)
 }
 
 kotlin {
-    jvm()
+    withJvm()
 
     sourceSets {
-        commonMain {
-            dependencies {
-                implementation(project(":qca-crypto"))
-                implementation(project(":qca-idp"))
-                implementation(libs.oshai.logging)
+        commonMain.dependencies {
+            api(projects.qcaIdp)
+            api(sharedLibs.ktor.client.core)
 
-                api(libs.ktor.client.core)
-            }
+            implementation(projects.qcaCrypto)
+            implementation(sharedLibs.lognity.api)
         }
-        jvmMain {
-            dependencies {
-                implementation(libs.bundles.bouncycastle)
-            }
-        }
-        commonTest {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotest.assertions.core)
-                implementation(libs.kotlinx.coroutines.test)
-            }
+        jvmMain.dependencies {
+            implementation(libs.bundles.bouncycastle)
         }
     }
 }
