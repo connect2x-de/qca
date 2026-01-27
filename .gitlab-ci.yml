@@ -184,7 +184,7 @@ security:dependencies:
     - trivy repo ./ --exit-code 0 --format template --template "@/contrib/gitlab.tpl" --output report.json
     - trivy repo ./ --exit-code 1 --severity CRITICAL
 
-publish:release:
+publish:dev:
   stage: publish
   tags: [ "connect2x-mac" ]
   timeout: 2h
@@ -197,6 +197,20 @@ publish:release:
   script:
     - ./gradlew
       publishAllPublicationsToGitLabRepository
+      --stacktrace
+      --no-configuration-cache
+
+publish:release:
+  stage: publish
+  tags: [ "connect2x-mac" ]
+  timeout: 2h
+  cache:
+    - *pull-cache-mac
+  artifacts: *artifact-reports
+  rules:
+    - *if-release
+  script:
+    - ./gradlew
       publishAndReleaseToMavenCentral
       --stacktrace
       --no-configuration-cache
