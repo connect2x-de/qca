@@ -32,7 +32,7 @@ kotlin {
     )
 
     sourceSets {
-        matching(KotlinSourceSet::isOpenssl).configureEach {
+        matching(KotlinSourceSet::needsExperimentalForeignApi).configureEach {
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
 
@@ -42,9 +42,9 @@ kotlin {
     }
 }
 
-private fun KotlinSourceSet.isOpenssl(): Boolean = when {
-    name == "opensslMain" || name == "opensslTest" -> true
-    dependsOn.any { it.isOpenssl() } -> true
+private fun KotlinSourceSet.needsExperimentalForeignApi(): Boolean = when {
+    name == "opensslMain" || name == "appleMain" -> true
+    dependsOn.any { it.needsExperimentalForeignApi() } -> true
     else -> false
 }
 
