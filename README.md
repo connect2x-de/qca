@@ -1,6 +1,6 @@
-# QCA - Quality Card Authenticator
+# QCA - Quality Card Access
 
-Multiplatform Kotlin SDK for gematik idp authentication using health care cards
+Multiplatform Kotlin SDK accessing gematik health care cards.
 
 Features:
 - Communicate with a gematik Healthcare NFC card using one common and extensible API on Android and iOS
