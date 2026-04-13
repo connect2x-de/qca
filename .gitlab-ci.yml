@@ -156,9 +156,7 @@ security:dependencies:
   timeout: 30m
   needs: [ ]
   tags: [ "saas-linux-small-amd64" ]
-  image:
-    name: "aquasec/trivy"
-    entrypoint: [ "" ]
+  image: registry.gitlab.com/connect2x/build-infrastructure/kmp-dockerfiles/kmp-dockerfiles-trivy:latest
   variables:
     TRIVY_CACHE_DIR: ".trivycache/"
     WITH_LOCK: true
@@ -177,7 +175,6 @@ security:dependencies:
     reports:
       dependency_scanning: report.json
   before_script:
-    - apk add openjdk17
     - ./gradlew dependenciesForAll --write-locks --no-parallel > dependencies.txt
   script:
     - trivy repo ./ --exit-code 0
