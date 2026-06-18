@@ -14,7 +14,7 @@ dependencyResolutionManagement {
 }
 
 plugins {
-    id("de.connect2x.conventions.c2x-settings-plugin") version "20260127.085233" // https://gitlab.com/connect2x/c2x-conventions/-/packages
+    id("de.connect2x.conventions.c2x-settings-plugin") version "20260606.144834" // https://gitlab.com/connect2x/c2x-conventions/-/packages
 }
 
 rootProject.name = "qca"
