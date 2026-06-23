@@ -177,9 +177,9 @@ security:dependencies:
   before_script:
     - ./gradlew dependenciesForAll --write-locks --no-parallel > dependencies.txt
   script:
-    - trivy repo ./ --exit-code 0
-    - trivy repo ./ --exit-code 0 --format template --template "@/usr/local/share/trivy/templates/gitlab.tpl" --output report.json
-    - trivy repo ./ --exit-code 1 --severity CRITICAL
+    - trivy repo ./ --exit-code 0 --ignorefile .trivyignore.yaml
+    - trivy repo ./ --exit-code 0 --ignorefile .trivyignore.yaml --format template --template "@/usr/local/share/trivy/templates/gitlab.tpl" --output report.json
+    - trivy repo ./ --exit-code 1 --ignorefile .trivyignore.yaml --severity CRITICAL
 
 publish:dev:
   stage: publish
