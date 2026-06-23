@@ -44,7 +44,7 @@ build:mac:
   script:
     - ./gradlew
       compileKotlin{IosArm64,IosSimulatorArm64}
-      compileTestKotlin{IosSimulatorArm64}
+      compileTestKotlin{IosArm64,IosSimulatorArm64}
       linkDebugTestIosSimulatorArm64
       --stacktrace
 
