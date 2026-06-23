@@ -8,55 +8,9 @@ workflow:
 
 stages:
   - build
+  - check
   - test
-  - security
   - publish
-
-variables:
-  GRADLE_OPTS: -Dorg.gradle.daemon=false
-  GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
-  KONAN_DATA_DIR: $CI_PROJECT_DIR/.konan
-  BUILD_LINUX_IMAGE_NAME:  registry.gitlab.com/connect2x/build-infrastructure/kmp-dockerfiles/kmp-dockerfiles-base:latest
-
-.cache-linux: &cache-linux
-  - key: global-qca-cache-linux
-    policy: pull-push
-    paths:
-      - $GRADLE_USER_HOME
-      - $KONAN_DATA_DIR
-  - key: "$CI_COMMIT_REF_NAME-linux"
-    policy: push
-    paths:
-      - $GRADLE_USER_HOME
-      - $KONAN_DATA_DIR
-
-.pull-cache-linux: &pull-cache-linux
-  - key: "$CI_COMMIT_REF_NAME-linux"
-    fallback_keys: [ "global-qca-cache-linux" ]
-    policy: pull
-    paths:
-      - $GRADLE_USER_HOME
-      - $KONAN_DATA_DIR
-
-.cache-mac: &cache-mac
-  - key: global-qca-cache-mac
-    policy: pull-push
-    paths:
-      - $GRADLE_USER_HOME
-      - $KONAN_DATA_DIR
-  - key: "$CI_COMMIT_REF_NAME-mac"
-    policy: push
-    paths:
-      - $GRADLE_USER_HOME
-      - $KONAN_DATA_DIR
-
-.pull-cache-mac: &pull-cache-mac
-  - key: "$CI_COMMIT_REF_NAME-mac"
-    fallback_keys: [ "global-qca-cache-mac" ]
-    policy: pull
-    paths:
-      - $GRADLE_USER_HOME
-      - $KONAN_DATA_DIR
 
 .artifact-reports: &artifact-reports
   name: reports
@@ -64,12 +18,6 @@ variables:
   paths: [ "**/build/reports" ]
   reports:
     junit: "**/build/test-results/**/TEST-*.xml"
-
-.docker-variables: &docker-variables
-  DOCKER_HOST: tcp://docker:2376
-  DOCKER_TLS_CERTDIR: "/certs"
-  DOCKER_TLS_VERIFY: 1
-  DOCKER_CERT_PATH: "${DOCKER_TLS_CERTDIR}/client"
 
 .if-merge-request-or-main: &if-merge-request-or-main
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -91,24 +39,19 @@ build:mac:
   stage: build
   interruptible: true
   tags: [ "connect2x-mac" ]
-  cache:
-    - *cache-mac
   rules:
     - *if-merge-request-or-main
   script:
     - ./gradlew
-      compileKotlin{IosArm64,IosSimulatorArm64,IosX64}
-      compileTestKotlin{IosSimulatorArm64,IosX64}
-      linkDebugTestIosX64
+      compileKotlin{IosArm64,IosSimulatorArm64}
+      compileTestKotlin{IosArm64,IosSimulatorArm64}
+      linkDebugTestIosSimulatorArm64
       --stacktrace
 
 build:linux:
   stage: build
   interruptible: true
-  tags: [ "connect2x-linux" ]
-  image: $BUILD_LINUX_IMAGE_NAME
-  cache:
-    - *cache-linux
+  tags: [ "connect2x-linux-shell" ]
   rules:
     - *if-merge-request-or-main
   script:
@@ -117,52 +60,14 @@ build:linux:
       compileTestKotlinJvm
       --stacktrace
 
-test:mac:
-  stage: test
-  interruptible: true
-  timeout: 1h
-  needs: [ "build:mac" ]
-  tags: [ "connect2x-mac" ]
-  cache:
-    - *pull-cache-mac
-  artifacts: *artifact-reports
-  rules:
-    - *if-merge-request-or-main
-  script:
-    - ./gradlew
-      {iosSimulatorArm64,iosX64}Test
-      --stacktrace
-
-test:linux:
-  stage: test
-  interruptible: true
-  timeout: 1h
-  needs: [ "build:linux" ]
-  tags: [ "connect2x-linux" ]
-  image: $BUILD_LINUX_IMAGE_NAME
-  cache:
-    - *pull-cache-linux
-  artifacts: *artifact-reports
-  rules:
-    - *if-merge-request-or-main
-  script:
-    - ./gradlew
-      {jvm,testReleaseUnit}Test
-      --stacktrace
-
-security:dependencies:
-  stage: security
+check:vulnerable-dependencies:
+  stage: check
   interruptible: true
   timeout: 30m
   needs: [ ]
-  tags: [ "saas-linux-small-amd64" ]
-  image: registry.gitlab.com/connect2x/build-infrastructure/kmp-dockerfiles/kmp-dockerfiles-trivy:latest
+  tags: [ "connect2x-linux-shell-small" ]
   variables:
-    TRIVY_CACHE_DIR: ".trivycache/"
     WITH_LOCK: true
-  cache:
-    paths:
-      - .trivycache/
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       allow_failure: true
@@ -174,19 +79,42 @@ security:dependencies:
     when: always
     reports:
       dependency_scanning: report.json
-  before_script:
-    - ./gradlew dependenciesForAll --write-locks --no-parallel > dependencies.txt
   script:
-    - trivy repo ./ --exit-code 0
-    - trivy repo ./ --exit-code 0 --format template --template "@/usr/local/share/trivy/templates/gitlab.tpl" --output report.json
-    - trivy repo ./ --exit-code 1 --severity CRITICAL
+    - ./gradlew dependenciesForAll --write-locks > dependencies.txt
+    - trivy repo ./ --exit-code 0 --ignorefile .trivyignore.yaml
+    - trivy repo ./ --exit-code 0 --ignorefile .trivyignore.yaml --format template --template "@/usr/local/share/trivy/templates/gitlab.tpl" --output report.json
+    - trivy repo ./ --exit-code 1 --ignorefile .trivyignore.yaml --severity CRITICAL
+
+test:mac:
+  stage: test
+  interruptible: true
+  timeout: 1h
+  needs: [ "build:mac" ]
+  tags: [ "saas-macos-medium-m1" ]
+  artifacts: *artifact-reports
+  rules:
+    - *if-merge-request-or-main
+  script:
+    - ./gradlew iosSimulatorArm64Test --stacktrace
+
+test:linux:
+  stage: test
+  interruptible: true
+  timeout: 1h
+  needs: [ "build:linux" ]
+  tags: [ "connect2x-linux-shell" ]
+  artifacts: *artifact-reports
+  rules:
+    - *if-merge-request-or-main
+  script:
+    - ./gradlew
+      {jvm,testReleaseUnit}Test
+      --stacktrace
 
 publish:dev:
   stage: publish
   tags: [ "connect2x-mac" ]
   timeout: 2h
-  cache:
-    - *pull-cache-mac
   artifacts: *artifact-reports
   rules:
     - *if-main
@@ -201,8 +129,6 @@ publish:release:
   stage: publish
   tags: [ "connect2x-mac" ]
   timeout: 2h
-  cache:
-    - *pull-cache-mac
   artifacts: *artifact-reports
   rules:
     - *if-release

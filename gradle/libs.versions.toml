@@ -1,9 +1,9 @@
 [versions]
-qca = "0.0.6"
+qca = "0.1.0"
 trixnityOpensslBinaries = "1.0.6" # https://gitlab.com/trixnity/trixnity-openssl-binaries/-/releases
 
 bouncyCastle = "1.84" # https://www.bouncycastle.org/download/bouncy-castle-java/#release-notes
-signum = "3.20.0" # https://github.com/a-sit-plus/signum/releases
+signum = "3.23.0" # https://github.com/a-sit-plus/signum/releases
 bignum = "0.3.10" # https://github.com/ionspin/kotlin-multiplatform-bignum/releases
 okio = "3.17.0" # https://square.github.io/okio/changelog/
 downloadGradlePlugin = "5.7.0" # https://github.com/michel-kraemer/gradle-download-task/releases
