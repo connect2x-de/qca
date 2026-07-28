@@ -90,7 +90,7 @@ test:mac:
   interruptible: true
   timeout: 1h
   needs: [ "build:mac" ]
-  tags: [ "saas-macos-medium-m1" ]
+  tags: [ "connect2x-mac-arm" ]
   artifacts: *artifact-reports
   rules:
     - *if-merge-request-or-main
