@@ -1,3 +1,5 @@
 vulnerabilities:
   - id: CVE-2026-9277
     statement: Only affects local dev tools
+  - id: CVE-2026-8763
+    statement: already upgraded, but still used for internal publishing

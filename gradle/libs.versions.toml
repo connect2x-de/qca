@@ -1,5 +1,5 @@
 [versions]
-qca = "0.1.2"
+qca = "0.1.1"
 trixnityOpensslBinaries = "1.0.6" # https://gitlab.com/trixnity/trixnity-openssl-binaries/-/releases
 
 bouncyCastle = "1.86" # https://www.bouncycastle.org/download/bouncy-castle-java/#release-notes
