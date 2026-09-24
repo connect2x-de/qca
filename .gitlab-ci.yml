@@ -38,7 +38,7 @@ stages:
 build:mac:
   stage: build
   interruptible: true
-  tags: [ "connect2x-mac" ]
+  tags: [ "c2x","mac","shell","medium" ]
   rules:
     - *if-merge-request-or-main
   script:
@@ -51,7 +51,7 @@ build:mac:
 build:linux:
   stage: build
   interruptible: true
-  tags: [ "connect2x-linux-shell" ]
+  tags: [ "c2x","linux","shell","medium" ]
   rules:
     - *if-merge-request-or-main
   script:
@@ -65,7 +65,7 @@ check:vulnerable-dependencies:
   interruptible: true
   timeout: 30m
   needs: [ ]
-  tags: [ "connect2x-linux-shell-small" ]
+  tags: [ "c2x","linux","shell","small" ]
   variables:
     WITH_LOCK: true
   rules:
@@ -90,7 +90,7 @@ test:mac:
   interruptible: true
   timeout: 1h
   needs: [ "build:mac" ]
-  tags: [ "connect2x-mac-arm" ]
+  tags: [ "c2x","mac","arm64","shell","small" ]
   artifacts: *artifact-reports
   rules:
     - *if-merge-request-or-main
@@ -102,7 +102,7 @@ test:linux:
   interruptible: true
   timeout: 1h
   needs: [ "build:linux" ]
-  tags: [ "connect2x-linux-shell" ]
+  tags: [ "c2x","shell","small" ]
   artifacts: *artifact-reports
   rules:
     - *if-merge-request-or-main
@@ -113,7 +113,7 @@ test:linux:
 
 publish:dev:
   stage: publish
-  tags: [ "connect2x-mac" ]
+  tags: [ "c2x","mac","shell","small" ]
   timeout: 2h
   artifacts: *artifact-reports
   rules:
@@ -127,7 +127,7 @@ publish:dev:
 
 publish:release:
   stage: publish
-  tags: [ "connect2x-mac" ]
+  tags: [ "c2x","mac","shell","small" ]
   timeout: 2h
   artifacts: *artifact-reports
   rules:
